@@ -30,6 +30,14 @@ backend:
   database:
     client: better-sqlite3
     connection: ':memory:'
+    # # config options: https://node-postgres.com/apis/client
+    # client: pg
+    # connection:
+    #   host: ${POSTGRES_HOST}
+    #   port: ${POSTGRES_PORT}
+    #   user: ${POSTGRES_USER}
+    #   password: ${POSTGRES_PASSWORD}
+
   # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
 
 integrations:
@@ -38,10 +46,10 @@ integrations:
       # This is a Personal Access Token or PAT from GitHub. You can find out how to generate this token, and more information
       # about setting up the GitHub integration here: https://backstage.io/docs/getting-started/configuration#setting-up-a-github-integration
       token: ${GITHUB_TOKEN}
-    ### Example for how to add your GitHub Enterprise instance using the API:
-    # - host: ghe.example.net
-    #   apiBaseUrl: https://ghe.example.net/api/v3
-    #   token: ${GHE_TOKEN}
+#    # ## Example for how to add your GitHub Enterprise instance using the API:
+#    # - host: ghe.example.net
+#    #   apiBaseUrl: https://ghe.example.net/api/v3
+#    #   token: ${GHE_TOKEN}
 
 proxy:
   ### Example for how to add a proxy endpoint for the frontend.
@@ -50,6 +58,18 @@ proxy:
   #   '/test':
   #     target: 'https://example.com'
   #     changeOrigin: true
+
+  # To get the token run:
+  # curl -v -X POST -d "grant_type=password&username=robot-user&password=top-secret" -u "application-id:top-secret" https://backstage-educates-plugin-ui.cluster-eu.spring-staging.academy/oauth2/token/
+  endpoints:
+    # You can access the data by: http://localhost:7007/api/proxy/educates/workshops/catalog/environments/
+    '/educates': # /educates/
+      target: 'https://backstage-educates-plugin-ui.cluster-eu.spring-staging.academy'
+      pathRewrite:
+        '^/api/proxy/educates': '/'
+      changeOrigin: true
+      headers:
+        Authorization: 'Bearer ${EDUCATES_TOKEN}'
 
 # Reference documentation http://backstage.io/docs/features/techdocs/configuration
 # Note: After experimenting with basic setup, use CI/CD to generate docs
@@ -64,7 +84,13 @@ techdocs:
 
 auth:
   # see https://backstage.io/docs/auth/ to learn about auth providers
-  providers: {}
+  # providers: {}
+  environment: development
+  providers:
+    github:
+      development:
+        clientId: ${AUTH_GITHUB_CLIENT_ID}
+        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
 
 scaffolder:
   # see https://backstage.io/docs/features/software-templates/configuration for software template options
@@ -74,7 +100,23 @@ catalog:
     entityFilename: catalog-info.yaml
     pullRequestBranchName: backstage-integration
   rules:
-    - allow: [Component, System, API, Resource, Location]
+    - allow:
+        [Component, System, API, Resource, Location, Workshop, TrainingPortal]
+  # In production, we probably want to discover entities from github repositories and orgs,
+  # for development we can use local files
+  providers:
+    github:
+      jorgemoralespou:
+        organization: 'jorgemoralespou' # string
+        catalogPath: '/catalog-info.yaml' # string
+        filters:
+          branch: 'develop' # string
+          repository: 'labs-educates-showcase' # Regex
+        schedule: # optional; same options as in TaskScheduleDefinition
+          # supports cron, ISO duration, "human duration" as used in code
+          frequency: { minutes: 30 }
+          # supports ISO duration, "human duration" as used in code
+          timeout: { minutes: 3 }
   locations:
     # Local example data, file locations are relative to the backend process, typically `packages/backend`
     - type: file
@@ -92,12 +134,26 @@ catalog:
       rules:
         - allow: [User, Group]
 
-    ## Uncomment these lines to add more example data
+    # # educates
+    # # In production, we probably want to discover entities from github repositories and orgs,
+    # # for development we can use local files
+    # # - type: file
+    # #   target: ../../examples/educates/entities.yaml
+    # #   rules:
+    # #     - allow: [Workshop, TrainingPortal]
     # - type: url
-    #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all.yaml
-
-    ## Uncomment these lines to add an example org
-    # - type: url
-    #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme-corp.yaml
+    #   target: https://github.com/jorgemoralespou/labs-educates-showcase/blob/develop/catalog-info.yaml
     #   rules:
-    #     - allow: [User, Group]
+    #     - allow: [Workshop, TrainingPortal]
+
+educates:
+  portals:
+    - name: backstage-educates-plugin-ui
+      url: https://backstage-educates-plugin-ui.cluster-eu.spring-staging.academy
+      robot:
+        credentials:
+          username: robot-user
+          password: top-secret
+        client:
+          id: application-id
+          secret: top-secret

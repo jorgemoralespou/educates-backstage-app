@@ -3,9 +3,9 @@
 #
 # Before building this image, be sure to have run the following commands in the repo root:
 #
-# yarn install
+# yarn install --frozen-lockfile
 # yarn tsc
-# yarn build:backend
+# yarn build:backend --config ../../app-config.yaml
 #
 # Once the commands have been run, you can build the image using `yarn build-image`
 

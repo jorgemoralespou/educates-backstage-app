@@ -1,0 +1,42 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+  backstage:
+    image: backstage
+    build:
+      # Execute before that:
+      # yarn install --frozen-lockfile
+      # yarn tsc
+      # yarn build:backend --config ../../app-config.yaml
+      context: .
+      dockerfile: packages/backend/Dockerfile
+    restart: always
+    #    volumes:
+    #      - ${PWD}/github-app-backstage-mybackstageapp-credentials.yaml:/app/github-app-backstage-mybackstageapp-credentials.yaml
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - AUTH_GITHUB_CLIENT_ID=${AUTH_GITHUB_CLIENT_ID}
+      - AUTH_GITHUB_CLIENT_SECRET=${AUTH_GITHUB_CLIENT_SECRET}
+      - BACKSTAGE_GITHUB_TOKEN=${BACKSTAGE_GITHUB_TOKEN}
+    ports:
+      - '7007:7007'
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - '5432:5432'
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080

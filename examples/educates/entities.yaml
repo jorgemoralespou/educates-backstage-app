@@ -1,0 +1,54 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: educates-workshops
+spec:
+  owner: educates
+---
+apiVersion: educates.dev/v1alpha1
+kind: TrainingPortal
+metadata:
+  name: labs-educates-showcase
+spec:
+  owner: educates
+  system: educates-workshops
+---
+apiVersion: educates.dev/v1alpha1
+kind: Workshop
+metadata:
+  name: lab-workshop-session
+spec:
+  owner: educates
+  system: educates-workshops
+---
+apiVersion: educates.dev/v1alpha1
+kind: Workshop
+metadata:
+  name: lab-session-namespace
+spec:
+  type: workshop
+  lifecycle: experimental
+  owner: educates
+  system: educates-workshops
+---
+# - name: lab-virtual-cluster
+# # - name: lab-virtual-machines
+# #    - name: lab-integrated-editor
+# - name: lab-slide-presentations
+#   reserved: 1
+#   initial: 1
+#   expires: 2m
+#   overtime: 5m
+#   deadline: 10m
+#   orphaned: 1m
+# - name: lab-docker-runtime
+# - name: lab-examiner-scripts
+# - name: lab-java-environment
+# - name: lab-conda-environment
+# - name: lab-shared-resources
+# - name: lab-session-resources
+# # - name: lab-extension-packages
+# - name: lab-managed-services
+# - name: lab-ingress-proxy
+# - name: lab-git-repositories

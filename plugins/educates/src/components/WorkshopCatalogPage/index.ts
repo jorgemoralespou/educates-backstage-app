@@ -1,0 +1,1 @@
+export { WorkshopCatalogPage } from './WorkshopCatalogPage';

@@ -1,0 +1,1133 @@
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  annotations:
+    training.educates.dev/source: https://github.com/educates/labs-vcluster-testing/releases/download/1.4/workshops.yaml
+    training.educates.dev/workshop: lab-admin-vcluster
+  name: lab-admin-vcluster
+spec:
+  title: VCluster sample
+  description: Test of shared virtual cluster providing full admin access.
+  url: https://github.com/educates/labs-vcluster-testing
+  difficulty: beginner
+  duration: 60m
+  vendor: educates.dev
+  authors:
+  - Jorge Morales
+  tags:
+  - vcluster
+  - samples
+  # labels:
+  #   id: educates.dev/lab-admin-vcluster
+  #   version: '1.4'
+  environment:
+    assets:
+      files:
+        - image:
+            url: ghcr.io/educates/labs-vcluster-testing/lab-admin-vcluster-files:1.4
+          path: .
+    objects:
+      - apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          name: kapp-installer
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: kapp-installer-$(workshop_namespace)
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: cluster-admin
+        subjects:
+          - kind: ServiceAccount
+            name: kapp-installer
+            namespace: $(workshop_namespace)
+  session:
+    applications:
+      console:
+        enabled: true
+        octant:
+          version: latest
+        vendor: octant
+      editor:
+        enabled: true
+      terminal:
+        enabled: true
+        layout: split
+      vcluster:
+        enabled: false
+    namespaces:
+      budget: large
+      security:
+        policy: baseline
+        token:
+          enabled: false
+    objects:
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: $(session_name)-admin-vcluster-values
+          namespace: $(workshop_namespace)
+        stringData:
+          values.yaml: |
+            vcluster:
+              image: rancher/k3s:v1.25.3-k3s1
+            syncer:
+              extraArgs:
+              - --tls-san=admin-vcluster.$(session_namespace).svc.$(cluster_domain)
+              - --out-kube-config-server=https://admin-vcluster.$(session_namespace).svc.$(cluster_domain)
+            sync:
+              ingresses:
+                enabled: true
+      - apiVersion: kappctrl.k14s.io/v1alpha1
+        kind: App
+        metadata:
+          name: $(session_name)-admin-vcluster-package
+          namespace: $(workshop_namespace)
+        spec:
+          deploy:
+            - kapp:
+                rawOptions:
+                  - --app-changes-max-to-keep=5
+          fetch:
+            - helmChart:
+                name: vcluster
+                repository:
+                  url: https://charts.loft.sh
+          noopDelete: true
+          serviceAccountName: kapp-installer
+          syncPeriod: 720h
+          template:
+            - helmTemplate:
+                name: admin-vcluster
+                namespace: $(session_namespace)
+                valuesFrom:
+                  - secretRef:
+                      name: $(session_name)-admin-vcluster-values
+            - ytt:
+                inline:
+                  paths:
+                    overlays.yaml: |
+                      #@ load("@ytt:data", "data")
+                      #@ load("@ytt:overlay", "overlay")
+                      #@overlay/match by=overlay.all, expects="1+"
+                      ---
+                      metadata:
+                        #@overlay/match missing_ok=True
+                        ownerReferences:
+                          - apiVersion: training.educates.dev/v1beta1
+                            kind: WorkshopSession
+                            blockOwnerDeletion: true
+                            controller: true
+                            name: $(session_name)
+                            uid: $(workshop_session_uid)
+      - apiVersion: secrets.educates.dev/v1beta1
+        kind: SecretCopier
+        metadata:
+          name: $(session_name)-kubeconfig
+        spec:
+          rules:
+            - sourceSecret:
+                name: vc-admin-vcluster
+                namespace: $(session_namespace)
+              targetNamespaces:
+                nameSelector:
+                  matchNames:
+                    - $(workshop_namespace)
+              targetSecret:
+                name: $(session_name)-kubeconfig
+    volumeMounts:
+      - mountPath: /opt/kubeconfig
+        name: admin-credentials-config
+    volumes:
+      - name: admin-credentials-config
+        secret:
+          secretName: $(session_name)-kubeconfig
+  title: Test of admin virtual cluster
+  version: '1.4'
+  workshop:
+    files:
+      - http:
+          url: http://$(assets_repository)/.tgz
+        includePaths:
+          - workshop/**
+        path: .
+---
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  annotations:
+    training.educates.dev/source: https://github.com/vmware-tanzu-labs/labs-container-workshops/releases/download/3.1/workshops.yaml
+    training.educates.dev/workshop: lab-container-basics
+  name: lab-container-basics
+spec:
+  description: An interactive workshop on running applications in containers.
+  session:
+    applications:
+      docker:
+        enabled: true
+      registry:
+        enabled: true
+      terminal:
+        enabled: true
+        layout: split
+    namespaces:
+      security:
+        token:
+          enabled: false
+  title: Container Basics
+  workshop:
+    files:
+      - image:
+          url: ghcr.io/vmware-tanzu-labs/labs-container-workshops-files:3.1
+        includePaths:
+          - /workshops/lab-container-basics/workshop/**
+          - /workshops/lab-container-basics/exercises/**
+        newRootPath: workshops/lab-container-basics
+        path: .
+---
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  annotations:
+    training.educates.dev/source: https://github.com/vmware-tanzu-labs/lab-k8s-fundamentals/releases/latest/download/workshop.yaml
+    training.educates.dev/workshop: lab-k8s-fundamentals
+  name: lab-k8s-fundamentals
+spec:
+  description: An interactive workshop on Kubernetes fundamentals.
+  session:
+    applications:
+      console:
+        enabled: true
+      editor:
+        enabled: true
+      slides:
+        enabled: true
+        reveal.js:
+          version: 3.x
+      terminal:
+        enabled: true
+        layout: split
+    namespaces:
+      budget: medium
+      security:
+        policy: restricted
+  title: Kubernetes Fundamentals
+  version: '7.1'
+  workshop:
+    files:
+      - image:
+          url: ghcr.io/vmware-tanzu-labs/lab-k8s-fundamentals-files:7.1
+        includePaths:
+          - /workshop/**
+          - /templates/**
+          - /README.md
+        path: .
+---
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-builtin-vcluster
+spec:
+  description: Test of using builtin support for creating a virtual cluster.
+  session:
+    applications:
+      console:
+        enabled: true
+      editor:
+        enabled: true
+      files:
+        enabled: true
+      terminal:
+        enabled: true
+        layout: split
+      vcluster:
+        enabled: true
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: false
+  title: Test of builtin virtual cluster
+  version: '1.4'
+  workshop:
+    files:
+      - image:
+          url: ghcr.io/educates/labs-vcluster-testing/lab-builtin-vcluster-files:1.4
+        path: .
+---
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-command-vcluster
+spec:
+  description: Test of creating a virtual cluster using the vcluster CLI.
+  session:
+    applications:
+      console:
+        enabled: true
+        vendor: octant
+      editor:
+        enabled: true
+      files:
+        enabled: true
+      terminal:
+        enabled: true
+        layout: split
+      vcluster:
+        enabled: false
+    dashboards:
+      - name: Cluster
+        url: terminal:vcluster
+    namespaces:
+      budget: large
+      security:
+        policy: baseline
+  title: Test of using the vcluster command
+  version: '1.4'
+  workshop:
+    files:
+      - image:
+          url: ghcr.io/educates/labs-vcluster-testing/lab-command-vcluster-files:1.4
+        path: .
+---
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-contour-vcluster
+spec:
+  description: Test of installing Contour into a virtual cluster.
+  environment:
+    assets:
+      files:
+        - image:
+            url: ghcr.io/educates/labs-vcluster-testing/lab-contour-vcluster-files:1.4
+          path: .
+    objects:
+      - apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          name: kapp-installer
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: kapp-installer-$(workshop_namespace)
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: cluster-admin
+        subjects:
+          - kind: ServiceAccount
+            name: kapp-installer
+            namespace: $(workshop_namespace)
+  session:
+    applications:
+      console:
+        enabled: true
+        octant:
+          version: latest
+        vendor: octant
+      editor:
+        enabled: true
+      terminal:
+        enabled: true
+        layout: split
+      vcluster:
+        enabled: false
+    namespaces:
+      budget: x-large
+      security:
+        policy: baseline
+        token:
+          enabled: false
+    objects:
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: $(session_name)-contour-vcluster-values
+          namespace: $(workshop_namespace)
+        stringData:
+          values.yaml: |
+            vcluster:
+              image: rancher/k3s:v1.25.3-k3s1
+            syncer:
+              extraArgs:
+              - --tls-san=contour-vcluster.$(session_namespace).svc.$(cluster_domain)
+              - --out-kube-config-server=https://contour-vcluster.$(session_namespace).svc.$(cluster_domain)
+            mapServices:
+              fromVirtual:
+              - from: projectcontour/contour-envoy
+                to: contour-envoy
+            init:
+              manifests: |-
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: projectcontour
+      - apiVersion: kappctrl.k14s.io/v1alpha1
+        kind: App
+        metadata:
+          name: $(session_name)-contour-vcluster-package
+          namespace: $(workshop_namespace)
+        spec:
+          deploy:
+            - kapp:
+                rawOptions:
+                  - --app-changes-max-to-keep=5
+          fetch:
+            - helmChart:
+                name: vcluster
+                repository:
+                  url: https://charts.loft.sh
+          noopDelete: true
+          serviceAccountName: kapp-installer
+          syncPeriod: 720h
+          template:
+            - helmTemplate:
+                name: contour-vcluster
+                namespace: $(session_namespace)
+                valuesFrom:
+                  - secretRef:
+                      name: $(session_name)-contour-vcluster-values
+            - ytt:
+                inline:
+                  paths:
+                    overlays.yaml: |
+                      #@ load("@ytt:data", "data")
+                      #@ load("@ytt:overlay", "overlay")
+                      #@overlay/match by=overlay.all, expects="1+"
+                      ---
+                      metadata:
+                        #@overlay/match missing_ok=True
+                        ownerReferences:
+                          - apiVersion: training.educates.dev/v1beta1
+                            kind: WorkshopSession
+                            blockOwnerDeletion: true
+                            controller: true
+                            name: $(session_name)
+                            uid: $(workshop_session_uid)
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: contour-values
+        stringData:
+          values.yaml: |
+            envoy:
+              service:
+                type: ClusterIP
+                externalTrafficPolicy: null
+              useHostPort: false
+      - apiVersion: kappctrl.k14s.io/v1alpha1
+        kind: App
+        metadata:
+          name: contour-package
+        spec:
+          cluster:
+            kubeconfigSecretRef:
+              key: config
+              name: vc-contour-vcluster
+            namespace: default
+          deploy:
+            - kapp:
+                rawOptions:
+                  - --app-changes-max-to-keep=5
+          fetch:
+            - helmChart:
+                name: contour
+                repository:
+                  url: https://charts.bitnami.com/bitnami
+          noopDelete: true
+          syncPeriod: 24h
+          template:
+            - helmTemplate:
+                name: contour
+                namespace: projectcontour
+                valuesFrom:
+                  - secretRef:
+                      name: contour-values
+      - apiVersion: networking.k8s.io/v1
+        kind: Ingress
+        metadata:
+          annotations:
+            nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
+            nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
+            projectcontour.io/response-timeout: 3600s
+            projectcontour.io/websocket-routes: /
+          name: contour
+        spec:
+          rules:
+            - host: '*.$(session_name).$(ingress_domain)'
+              http:
+                paths:
+                  - backend:
+                      service:
+                        name: contour-envoy
+                        port:
+                          number: 80
+                    path: /
+                    pathType: Prefix
+      - apiVersion: secrets.educates.dev/v1beta1
+        kind: SecretCopier
+        metadata:
+          name: $(session_name)-kubeconfig
+        spec:
+          rules:
+            - sourceSecret:
+                name: vc-contour-vcluster
+                namespace: $(session_namespace)
+              targetNamespaces:
+                nameSelector:
+                  matchNames:
+                    - $(workshop_namespace)
+              targetSecret:
+                name: $(session_name)-kubeconfig
+    volumeMounts:
+      - mountPath: /opt/kubeconfig
+        name: admin-credentials-config
+    volumes:
+      - name: admin-credentials-config
+        secret:
+          secretName: $(session_name)-kubeconfig
+  title: Test of Contour with a virtual cluster
+  version: '1.4'
+  workshop:
+    files:
+      - image:
+          url: ghcr.io/educates/labs-vcluster-testing/lab-contour-vcluster-files:1.4
+        includePaths:
+          - workshop/**
+        path: .
+---
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-remote-cluster
+spec:
+  description: Test of using remote cluster and single namespace per session.
+  environment:
+    assets:
+      files:
+        - image:
+            url: ghcr.io/educates/labs-vcluster-testing/lab-remote-cluster-files:1.4
+          path: .
+    objects:
+      - apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          name: kapp-installer
+          namespace: $(workshop_namespace)
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: kapp-installer-$(workshop_namespace)
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: cluster-admin
+        subjects:
+          - kind: ServiceAccount
+            name: kapp-installer
+            namespace: $(workshop_namespace)
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: cluster-credentials-values
+          namespace: $(workshop_namespace)
+        stringData:
+          values.yaml: |
+            namespace: $(workshop_namespace)
+      - apiVersion: kappctrl.k14s.io/v1alpha1
+        kind: App
+        metadata:
+          name: cluster-credentials-package
+          namespace: $(workshop_namespace)
+        spec:
+          deploy:
+            - kapp:
+                rawOptions:
+                  - --app-changes-max-to-keep=5
+          fetch:
+            - http:
+                url: http://$(assets_repository)/packages/cluster-credentials/.tgz
+              path: packages/cluster-credentials
+          noopDelete: true
+          serviceAccountName: kapp-installer
+          syncPeriod: 720h
+          template:
+            - ytt:
+                paths:
+                  - packages/cluster-credentials
+                valuesFrom:
+                  - secretRef:
+                      name: cluster-credentials-values
+  request:
+    objects:
+      - apiVersion: secrets.educates.dev/v1beta1
+        kind: SecretCopier
+        metadata:
+          name: admin-credentials-$(session_name)
+        spec:
+          rules:
+            - sourceSecret:
+                name: $(CREDENTIALS_SECRET)
+                namespace: $(CREDENTIALS_NAMESPACE)
+              targetNamespaces:
+                nameSelector:
+                  matchNames:
+                    - $(workshop_namespace)
+              targetSecret:
+                name: admin-credentials-$(session_name)
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: cluster-session-values-$(session_name)
+          namespace: $(workshop_namespace)
+        stringData:
+          values.yaml: |
+            developer: $(session_name)
+            namespaces:
+            - $(session_name)-n1
+            session: $(session_name)
+      - apiVersion: kappctrl.k14s.io/v1alpha1
+        kind: App
+        metadata:
+          name: cluster-session-$(session_name)
+          namespace: $(workshop_namespace)
+        spec:
+          cluster:
+            kubeconfigSecretRef:
+              key: config
+              name: admin-credentials-$(session_name)
+            namespace: default
+          deploy:
+            - kapp:
+                rawOptions:
+                  - --app-changes-max-to-keep=5
+          fetch:
+            - http:
+                url: http://$(assets_repository)/packages/developer-namespace/.tgz
+              path: packages/developer-namespace
+          syncPeriod: 720h
+          template:
+            - ytt:
+                paths:
+                  - packages/developer-namespace
+                valuesFrom:
+                  - secretRef:
+                      name: cluster-session-values-$(session_name)
+    parameters:
+      - name: CREDENTIALS_NAMESPACE
+        value: default
+      - name: CREDENTIALS_SECRET
+        value: cluster-credentials
+  session:
+    applications:
+      console:
+        enabled: true
+        octant:
+          version: latest
+        vendor: octant
+      editor:
+        enabled: true
+      terminal:
+        enabled: true
+        layout: split
+      vcluster:
+        enabled: false
+    initContainers:
+      - command:
+          - /opt/cluster-credentials-scripts/create-kubeconfig-from-serviceaccount.sh
+        env:
+          - name: DEVELOPER_NAME
+            value: $(session_name)
+          - name: DEFAULT_NAMESPACE
+            value: $(session_name)-n1
+        image: $(workshop_image)
+        name: setup-cluster-credentials
+        volumeMounts:
+          - mountPath: /opt/admin-credentials-config
+            name: admin-credentials-config
+          - mountPath: /opt/cluster-credentials-scripts
+            name: cluster-credentials-scripts
+          - mountPath: /opt/session-credentials-config
+            name: session-credentials-config
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: false
+    volumeMounts:
+      - mountPath: /opt/kubeconfig
+        name: session-credentials-config
+    volumes:
+      - name: admin-credentials-config
+        secret:
+          secretName: admin-credentials-$(session_name)
+      - name: cluster-credentials-scripts
+        secret:
+          defaultMode: 493
+          secretName: cluster-credentials-scripts
+      - emptyDir: {}
+        name: session-credentials-config
+  title: Test of using a remote cluster
+  version: '1.4'
+  workshop:
+    files:
+      - http:
+          url: http://$(assets_repository)/.tgz
+        includePaths:
+          - workshop/**
+        path: .
+---
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-setup-vcluster
+spec:
+  description: Test of how to prepopulate a virtual cluster with resources.
+  session:
+    applications:
+      console:
+        enabled: true
+      editor:
+        enabled: true
+      files:
+        enabled: true
+      git:
+        enabled: true
+      terminal:
+        enabled: true
+        layout: split
+      vcluster:
+        enabled: true
+        objects:
+          - apiVersion: v1
+            kind: Secret
+            metadata:
+              name: git-credentials-1
+              namespace: default
+            stringData:
+              GIT_HOST: $(git_host)
+              GIT_PASSWORD: $(git_password)
+              GIT_PROTOCOL: $(git_protocol)
+              GIT_USERNAME: $(git_username)
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: false
+    objects:
+      - apiVersion: kappctrl.k14s.io/v1alpha1
+        kind: App
+        metadata:
+          name: kapp-controller
+          namespace: $(session_namespace)-vc
+        spec:
+          cluster:
+            kubeconfigSecretRef:
+              key: config
+              name: $(vcluster_secret)
+            namespace: default
+          deploy:
+            - kapp: {}
+          fetch:
+            - http:
+                url: https://github.com/carvel-dev/kapp-controller/releases/download/v0.44.9/release.yml
+          noopDelete: true
+          syncPeriod: 24h
+          template:
+            - ytt: {}
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: credentials-data-values
+          namespace: $(session_namespace)-vc
+        stringData:
+          values.yaml: |
+            GIT_PROTOCOL: $(git_protocol)
+            GIT_HOST: $(git_host)
+            GIT_USERNAME: $(git_username)
+            GIT_PASSWORD: $(git_password)
+      - apiVersion: kappctrl.k14s.io/v1alpha1
+        kind: App
+        metadata:
+          name: git-credentials-2
+          namespace: $(session_namespace)-vc
+        spec:
+          cluster:
+            kubeconfigSecretRef:
+              key: config
+              name: $(vcluster_secret)
+            namespace: default
+          deploy:
+            - kapp: {}
+          fetch:
+            - image:
+                url: ghcr.io/educates/labs-vcluster-testing/lab-setup-vcluster-files:1.4
+          noopDelete: true
+          syncPeriod: 24h
+          template:
+            - ytt:
+                paths:
+                  - templates/git-credentials-2.yaml
+                valuesFrom:
+                  - secretRef:
+                      name: credentials-data-values
+      - apiVersion: kappctrl.k14s.io/v1alpha1
+        kind: App
+        metadata:
+          name: git-credentials-3
+          namespace: $(session_namespace)-vc
+        spec:
+          cluster:
+            kubeconfigSecretRef:
+              key: config
+              name: $(vcluster_secret)
+            namespace: default
+          deploy:
+            - kapp: {}
+          fetch:
+            - http:
+                url: $(session_url)/files/objects/git-credentials-3.yaml?token=$(services_password)
+          noopDelete: true
+          syncPeriod: 24h
+          template:
+            - ytt: {}
+  title: Test of setting up a virtual cluster
+  version: '1.4'
+  workshop:
+    files:
+      - image:
+          url: ghcr.io/educates/labs-vcluster-testing/lab-setup-vcluster-files:1.4
+        path: .
+---
+apiVersion: training.educates.dev/v1beta1
+kind: Workshop
+metadata:
+  name: lab-shared-vcluster
+spec:
+  description: Test of using shared virtual cluster and single namespace per session.
+  environment:
+    objects:
+      - apiVersion: v1
+        kind: ServiceAccount
+        metadata:
+          name: kapp-installer
+          namespace: $(workshop_namespace)
+      - apiVersion: rbac.authorization.k8s.io/v1
+        kind: ClusterRoleBinding
+        metadata:
+          name: kapp-installer-$(workshop_namespace)
+        roleRef:
+          apiGroup: rbac.authorization.k8s.io
+          kind: ClusterRole
+          name: cluster-admin
+        subjects:
+          - kind: ServiceAccount
+            name: kapp-installer
+            namespace: $(workshop_namespace)
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: shared-vcluster-values
+          namespace: $(workshop_namespace)
+        stringData:
+          values.yaml: |
+            vcluster:
+              image: rancher/k3s:v1.25.3-k3s1
+            syncer:
+              extraArgs:
+              - --tls-san=shared-vcluster.$(workshop_namespace).svc.$(cluster_domain)
+              - --out-kube-config-server=https://shared-vcluster.$(workshop_namespace).svc.$(cluster_domain)
+            sync:
+              ingresses:
+                enabled: true
+            init:
+              manifests: |-
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: jspolicy
+      - apiVersion: kappctrl.k14s.io/v1alpha1
+        kind: App
+        metadata:
+          name: shared-vcluster-package
+          namespace: $(workshop_namespace)
+        spec:
+          deploy:
+            - kapp:
+                rawOptions:
+                  - --app-changes-max-to-keep=5
+          fetch:
+            - helmChart:
+                name: vcluster
+                repository:
+                  url: https://charts.loft.sh
+          noopDelete: true
+          serviceAccountName: kapp-installer
+          syncPeriod: 720h
+          template:
+            - helmTemplate:
+                name: shared-vcluster
+                namespace: $(workshop_namespace)
+                valuesFrom:
+                  - secretRef:
+                      name: shared-vcluster-values
+            - ytt:
+                inline:
+                  paths:
+                    overlays.yaml: |
+                      #@ load("@ytt:data", "data")
+                      #@ load("@ytt:overlay", "overlay")
+                      #@overlay/match by=overlay.all, expects="1+"
+                      ---
+                      metadata:
+                        #@overlay/match missing_ok=True
+                        ownerReferences:
+                          - apiVersion: training.educates.dev/v1beta1
+                            kind: WorkshopEnvironment
+                            blockOwnerDeletion: true
+                            controller: true
+                            name: $(environment_name)
+                            uid: $(workshop_environment_uid)
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: cluster-credentials-values
+          namespace: $(workshop_namespace)
+        stringData:
+          values.yaml: |
+            namespace: $(workshop_namespace)
+      - apiVersion: kappctrl.k14s.io/v1alpha1
+        kind: App
+        metadata:
+          name: cluster-credentials-package
+          namespace: $(workshop_namespace)
+        spec:
+          deploy:
+            - kapp:
+                rawOptions:
+                  - --app-changes-max-to-keep=5
+          fetch:
+            - image:
+                url: ghcr.io/educates/labs-vcluster-testing/lab-shared-vcluster-files:1.4
+              includePaths:
+                - packages/cluster-credentials/**
+          noopDelete: true
+          serviceAccountName: kapp-installer
+          syncPeriod: 720h
+          template:
+            - ytt:
+                paths:
+                  - packages/cluster-credentials
+                valuesFrom:
+                  - secretRef:
+                      name: cluster-credentials-values
+      - apiVersion: kappctrl.k14s.io/v1alpha1
+        kind: App
+        metadata:
+          name: jspolicy-package
+        spec:
+          cluster:
+            kubeconfigSecretRef:
+              key: config
+              name: vc-shared-vcluster
+            namespace: default
+          deploy:
+            - kapp:
+                rawOptions:
+                  - --app-changes-max-to-keep=5
+          fetch:
+            - helmChart:
+                name: jspolicy
+                repository:
+                  url: https://charts.loft.sh
+          noopDelete: true
+          syncPeriod: 720h
+          template:
+            - helmTemplate:
+                name: jspolicy
+                namespace: jspolicy
+  session:
+    applications:
+      console:
+        enabled: true
+        octant:
+          version: latest
+        vendor: octant
+      editor:
+        enabled: true
+      terminal:
+        enabled: true
+        layout: split
+      vcluster:
+        enabled: false
+    initContainers:
+      - command:
+          - /opt/cluster-credentials-scripts/create-kubeconfig-from-serviceaccount.sh
+        env:
+          - name: DEVELOPER_NAME
+            value: $(session_name)
+          - name: DEFAULT_NAMESPACE
+            value: $(session_name)-n1
+        image: $(workshop_image)
+        name: setup-cluster-credentials
+        volumeMounts:
+          - mountPath: /opt/admin-credentials-config
+            name: admin-credentials-config
+          - mountPath: /opt/cluster-credentials-scripts
+            name: cluster-credentials-scripts
+          - mountPath: /opt/session-credentials-config
+            name: session-credentials-config
+    namespaces:
+      budget: medium
+      security:
+        token:
+          enabled: false
+    objects:
+      - apiVersion: v1
+        kind: Secret
+        metadata:
+          name: vcluster-session-values-$(session_name)
+          namespace: $(workshop_namespace)
+        stringData:
+          values.yaml: |
+            developer: $(session_name)
+            namespaces:
+            - $(session_name)-n1
+            session: $(session_name)
+            policy: jspolicy
+      - apiVersion: kappctrl.k14s.io/v1alpha1
+        kind: App
+        metadata:
+          name: vcluster-session-$(session_name)
+          namespace: $(workshop_namespace)
+        spec:
+          cluster:
+            kubeconfigSecretRef:
+              key: config
+              name: vc-shared-vcluster
+            namespace: default
+          deploy:
+            - kapp:
+                rawOptions:
+                  - --app-changes-max-to-keep=5
+          fetch:
+            - image:
+                url: ghcr.io/educates/labs-vcluster-testing/lab-shared-vcluster-files:1.4
+              includePaths:
+                - packages/developer-namespace/**
+          syncPeriod: 720h
+          template:
+            - ytt:
+                paths:
+                  - packages/developer-namespace
+                valuesFrom:
+                  - secretRef:
+                      name: vcluster-session-values-$(session_name)
+    volumeMounts:
+      - mountPath: /opt/kubeconfig
+        name: session-credentials-config
+    volumes:
+      - name: admin-credentials-config
+        secret:
+          secretName: vc-shared-vcluster
+      - name: cluster-credentials-scripts
+        secret:
+          defaultMode: 493
+          secretName: cluster-credentials-scripts
+      - emptyDir: {}
+        name: session-credentials-config
+  title: Test of shared virtual cluster
+  version: '1.4'
+  workshop:
+    files:
+      - image:
+          url: ghcr.io/educates/labs-vcluster-testing/lab-shared-vcluster-files:1.4
+        includePaths:
+          - workshop/**
+        path: .
+---
+apiVersion: training.educates.dev/v1beta1
+kind: TrainingPortal
+metadata:
+  name: backstage-educates-plugin
+spec:
+  portal:
+    credentials:
+      admin:
+        username: admin-user
+        password: top-secret
+      robot:
+        username: robot-user
+        password: top-secret
+    clients:
+      robot:
+        id: application-id
+        secret: top-secret
+    password: 'password'
+    registration:
+      type: anonymous
+    sessions:
+      maximum: 5
+    updates:
+      workshop: true
+    workshop:
+      defaults:
+        reserved: 0
+  workshops:
+    - expires: 60m
+      initial: 0
+      name: lab-k8s-fundamentals
+      orphaned: 5m
+      overdue: 2m
+      reserved: 0
+    - expires: 60m
+      initial: 0
+      name: lab-container-basics
+      orphaned: 5m
+      overdue: 2m
+      reserved: 0
+    - expires: 60m
+      initial: 0
+      name: lab-admin-vcluster
+      orphaned: 5m
+      overdue: 2m
+      reserved: 0
+    - expires: 60m
+      initial: 0
+      name: lab-builtin-vcluster
+      orphaned: 5m
+      overdue: 2m
+      reserved: 0
+    - expires: 60m
+      initial: 0
+      name: lab-command-vcluster
+      orphaned: 5m
+      overdue: 2m
+      reserved: 0
+    - expires: 60m
+      initial: 0
+      name: lab-contour-vcluster
+      orphaned: 5m
+      overdue: 2m
+      reserved: 0
+    - expires: 60m
+      initial: 0
+      name: lab-remote-cluster
+      orphaned: 5m
+      overdue: 2m
+      reserved: 0
+    - expires: 60m
+      initial: 0
+      name: lab-setup-vcluster
+      orphaned: 5m
+      overdue: 2m
+      reserved: 0
+    - expires: 60m
+      initial: 0
+      name: lab-shared-vcluster
+      orphaned: 5m
+      overdue: 2m
+      reserved: 0

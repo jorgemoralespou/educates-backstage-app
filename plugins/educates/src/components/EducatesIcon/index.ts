@@ -1,0 +1,1 @@
+export { EducatesIcon } from './EducatesIcon';

@@ -1,0 +1,4 @@
+annotations:
+  backstage.io/kubernetes-id: <BACKSTAGE_ENTITY_NAME>
+labels:
+  backstage.io/kubernetes-id: <BACKSTAGE_ENTITY_NAME>
