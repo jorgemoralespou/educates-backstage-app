@@ -32,7 +32,7 @@ If using kind, you can do `kind load docker-image educates-backstage:0.0.1 --nam
 
 ```
 docker buildx build --platform linux/amd64,linux/arm64 -t "jorgemoralespou/bstg:devel" . -f packages/backend/Dockerfile --push
-ytt --data-values-file my-values.yaml -f . | kbld -f - | kapp deploy -a educates-backstage -n default -c -f - -y
+ytt --data-values-file kubernetes/my-values.yaml -f kubernetes/bundle | kbld -f - | kapp deploy -a educates-backstage -n default -c -f - -y
 ```
 
 ## Delete

@@ -1,4 +1,4 @@
-// import { UrlReader } from '@backstage/backend-common';
+import { UrlReader } from '@backstage/backend-common';
 import {
   processingResult,
   CatalogProcessor,
@@ -26,7 +26,7 @@ import {
 
 export class EducatesEntitiesProcessor implements CatalogProcessor {
   constructor(
-    // private readonly reader: UrlReader,
+    private readonly reader: UrlReader,
     private readonly logger: Logger,
   ) {}
   getProcessorName(): string {

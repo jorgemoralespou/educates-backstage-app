@@ -420,6 +420,10 @@ const trainingportalPage = (
     <EntityLayout.Route path="/kubernetes" title="Kubernetes">
       <EntityKubernetesContent refreshIntervalMs={30000} />
     </EntityLayout.Route>
+
+    <EntityLayout.Route path="/github-actions" title="GitHub Actions">
+      <EntityGithubActionsContent />
+    </EntityLayout.Route>
   </EntityLayout>
 );
 
@@ -458,6 +462,10 @@ const workshopPage = (
 
     <EntityLayout.Route path="/kubernetes" title="Kubernetes">
       <EntityKubernetesContent refreshIntervalMs={30000} />
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/github-actions" title="GitHub Actions">
+      <EntityGithubActionsContent />
     </EntityLayout.Route>
   </EntityLayout>
 );
