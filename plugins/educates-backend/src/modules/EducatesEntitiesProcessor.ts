@@ -1,4 +1,4 @@
-import { UrlReader } from '@backstage/backend-common';
+// import { UrlReader } from '@backstage/backend-common';
 import {
   processingResult,
   CatalogProcessor,
@@ -20,11 +20,13 @@ import { Logger } from 'winston';
 import {
   TrainingPortalEntity,
   WorkshopEntity,
+  RELATION_INCLUDES_WORKSHOP,
+  RELATION_WORKSHOP_INCLUDED_BY,
 } from '@internal/plugin-educates-common';
 
 export class EducatesEntitiesProcessor implements CatalogProcessor {
   constructor(
-    private readonly reader: UrlReader,
+    // private readonly reader: UrlReader,
     private readonly logger: Logger,
   ) {}
   getProcessorName(): string {
@@ -53,16 +55,16 @@ export class EducatesEntitiesProcessor implements CatalogProcessor {
    * Only educates entities are processed
    *
    * @param entity
-   * @param location
+   * @param _location
    * @param emit
-   * @param cache
+   * @param _cache
    * @returns
    */
   async postProcessEntity(
     entity: Entity,
-    location: LocationSpec,
+    _location: LocationSpec,
     emit: CatalogProcessorEmit,
-    cache: CatalogProcessorCache,
+    _cache: CatalogProcessorCache,
   ): Promise<Entity> {
     const selfRef = getCompoundEntityRef(entity);
 
@@ -144,6 +146,13 @@ export class EducatesEntitiesProcessor implements CatalogProcessor {
         RELATION_PART_OF,
         RELATION_HAS_PART,
       );
+      doEmit(
+        component.spec.includedWorkshops,
+        { defaultKind: 'Workshop', defaultNamespace: selfRef.namespace },
+        RELATION_WORKSHOP_INCLUDED_BY,
+        RELATION_INCLUDES_WORKSHOP,
+      );
+      this.logger.info('Processed TrainingPortal');
     }
 
     if (entity.kind === 'Workshop') {
@@ -184,6 +193,13 @@ export class EducatesEntitiesProcessor implements CatalogProcessor {
         RELATION_PART_OF,
         RELATION_HAS_PART,
       );
+      doEmit(
+        component.spec.trainingPortals,
+        { defaultKind: 'TrainingPortal', defaultNamespace: selfRef.namespace },
+        RELATION_INCLUDES_WORKSHOP,
+        RELATION_WORKSHOP_INCLUDED_BY,
+      );
+      this.logger.info('Processed Workshop');
     }
 
     return entity;

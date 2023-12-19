@@ -7,3 +7,5 @@ export type {
   WorkshopEntityV1alpha1 as WorkshopEntity,
   WorkshopEntityV1alpha1,
 } from './WorkshopEntity';
+export const RELATION_INCLUDES_WORKSHOP = 'includesWorkshop';
+export const RELATION_WORKSHOP_INCLUDED_BY = 'workshopIncludedBy';

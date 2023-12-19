@@ -54,9 +54,14 @@ import {
   RELATION_PART_OF,
   RELATION_PROVIDES_API,
 } from '@backstage/catalog-model';
+import { EntityKubernetesContent } from '@backstage/plugin-kubernetes';
 
 import { TechDocsAddons } from '@backstage/plugin-techdocs-react';
 import { ReportIssue } from '@backstage/plugin-techdocs-module-addons-contrib';
+import {
+  RELATION_INCLUDES_WORKSHOP,
+  RELATION_WORKSHOP_INCLUDED_BY,
+} from '@internal/plugin-educates-common';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -170,6 +175,10 @@ const serviceEntityPage = (
           <EntityDependsOnResourcesCard variant="gridItem" />
         </Grid>
       </Grid>
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/kubernetes" title="Kubernetes">
+      <EntityKubernetesContent refreshIntervalMs={30000} />
     </EntityLayout.Route>
 
     <EntityLayout.Route path="/docs" title="Docs">
@@ -382,6 +391,7 @@ const trainingportalPage = (
         <Grid item md={6}>
           <EntityAboutCard variant="gridItem" />
         </Grid>
+
         {/* <Grid item md={6} xs={12}>
           <EntityCatalogGraphCard variant="gridItem" height={400} />
         </Grid>
@@ -389,6 +399,26 @@ const trainingportalPage = (
           <EntityHasSystemsCard variant="gridItem" />
         </Grid> */}
       </Grid>
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/diagram" title="Diagram">
+      <EntityCatalogGraphCard
+        variant="gridItem"
+        direction={Direction.TOP_BOTTOM}
+        title="System Diagram"
+        height={700}
+        relations={[
+          RELATION_PART_OF,
+          RELATION_HAS_PART,
+          RELATION_WORKSHOP_INCLUDED_BY,
+          RELATION_INCLUDES_WORKSHOP,
+        ]}
+        unidirectional={false}
+      />
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/kubernetes" title="Kubernetes">
+      <EntityKubernetesContent refreshIntervalMs={30000} />
     </EntityLayout.Route>
   </EntityLayout>
 );
@@ -408,6 +438,26 @@ const workshopPage = (
           <EntityHasSystemsCard variant="gridItem" />
         </Grid> */}
       </Grid>
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/diagram" title="Diagram">
+      <EntityCatalogGraphCard
+        variant="gridItem"
+        direction={Direction.TOP_BOTTOM}
+        title="System Diagram"
+        height={700}
+        relations={[
+          RELATION_PART_OF,
+          RELATION_HAS_PART,
+          RELATION_WORKSHOP_INCLUDED_BY,
+          RELATION_INCLUDES_WORKSHOP,
+        ]}
+        unidirectional={false}
+      />
+    </EntityLayout.Route>
+
+    <EntityLayout.Route path="/kubernetes" title="Kubernetes">
+      <EntityKubernetesContent refreshIntervalMs={30000} />
     </EntityLayout.Route>
   </EntityLayout>
 );

@@ -26,8 +26,12 @@ export const educatesPlugin = createPlugin({
         identityApi: identityApiRef,
         fetchApi: fetchApiRef,
       },
-      factory: ({ discoveryApi, identityApi, fetchApi }) =>
-        new EducatesRestApiClient({ discoveryApi, identityApi, fetchApi }),
+      factory: ({ discoveryApi, /* identityApi, */ fetchApi }) =>
+        new EducatesRestApiClient({
+          discoveryApi,
+          /* identityApi, */
+          fetchApi,
+        }),
     }),
     createApiFactory({
       api: educatesCatalogApiRef,

@@ -1,0 +1,15 @@
+#@data/values-schema
+---
+full_image_name: educates-backstage:0.0.1
+#@schema/nullable
+#@schema/validation not_null=True
+github_token: ''
+auth:
+  github:
+    client_id: ''
+    client_secret: ''
+postgres:
+  user: backstage
+  password: postgres
+#@schema/type any=True
+app_config:

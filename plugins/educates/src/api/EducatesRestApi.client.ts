@@ -1,7 +1,7 @@
 import {
   DiscoveryApi,
   FetchApi,
-  IdentityApi,
+  // IdentityApi,
 } from '@backstage/core-plugin-api';
 import {
   EducatesRestApiCatalogResponse,
@@ -11,20 +11,20 @@ import {
 import { EducatesRestApi } from './EducatesRestApi';
 
 export class EducatesRestApiClient implements EducatesRestApi {
-  private readonly identityApi: IdentityApi;
+  // private readonly identityApi: IdentityApi;
   private readonly discoveryApi: DiscoveryApi;
   private readonly fetchApi: FetchApi;
 
   private discoveredProxyUri: string | undefined;
 
-  private privateUser: string | undefined;
+  // private privateUser: string | undefined;
 
   constructor(options: {
-    identityApi: IdentityApi;
+    // identityApi: IdentityApi;
     discoveryApi: DiscoveryApi;
     fetchApi: FetchApi;
   }) {
-    this.identityApi = options.identityApi;
+    // this.identityApi = options.identityApi;
     this.discoveryApi = options.discoveryApi;
     this.fetchApi = options.fetchApi;
     // this.identityApi.getCredentials().then(creds => {

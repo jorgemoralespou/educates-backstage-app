@@ -17,14 +17,14 @@ export class EducatesEntitiesProvider
   private readonly logger: Logger;
   private readonly topics: string[];
 
-  private readonly reader: UrlReader;
+  // private readonly reader: UrlReader;
   private connection?: EntityProviderConnection;
 
   constructor(opts: { logger: Logger; topics: string[]; reader: UrlReader }) {
-    const { logger, topics, reader } = opts;
+    const { logger, topics } = opts;
     this.logger = logger;
     this.topics = topics;
-    this.reader = reader;
+    // this.reader = reader;
   }
 
   /** [2] */
@@ -72,7 +72,7 @@ export class EducatesEntitiesProvider
     return this.topics;
   }
 }
-function trainingportalToEntities(data: any): Entity[] {
+function trainingportalToEntities(_data: any): Entity[] {
   const result: Entity[] = [];
   const count = 10;
 

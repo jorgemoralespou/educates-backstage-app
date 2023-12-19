@@ -1,19 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import React from 'react';
 import {
   Progress,
   ResponseErrorPanel,
   ItemCardGrid,
   ItemCardHeader,
-  LinkButton,
-  InfoCard,
-  CodeSnippet,
-  BottomLink,
 } from '@backstage/core-components';
 import useAsync from 'react-use/lib/useAsync';
 import {
   Card,
-  CardActions,
   CardContent,
   CardMedia,
   Chip,
@@ -22,19 +16,9 @@ import {
 import { useApi } from '@backstage/core-plugin-api';
 import { useUserProfile } from '../useUserProfileInfo';
 import { educatesCatalogApiRef } from '../../api/EducatesCatalogApi';
-import {
-  EducatesCatalogApiResponse,
-  Workshop,
-} from '../../api/EducatesCatalogApi.model';
+import { Workshop } from '../../api/EducatesCatalogApi.model';
 
-const useStyles = makeStyles({
-  avatar: {
-    height: 32,
-    width: 32,
-    borderRadius: '50%',
-  },
-});
-
+// s
 type WorkshopGridProps = {
   userName: string;
   workshops: Workshop[];

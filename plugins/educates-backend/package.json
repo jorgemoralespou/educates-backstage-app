@@ -30,7 +30,7 @@
     "@backstage/plugin-catalog-common": "^1.0.18",
     "@backstage/plugin-catalog-node": "^1.5.0",
     "@backstage/plugin-events-node": "^0.2.16",
-    "@internal/educates-common": "link:../educates-common",
+    "@internal/plugin-educates-common": "link:../plugin-educates-common",
     "@types/express": "*",
     "express": "^4.17.1",
     "express-promise-router": "^4.1.0",

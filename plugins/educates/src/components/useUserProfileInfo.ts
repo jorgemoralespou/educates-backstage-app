@@ -1,12 +1,12 @@
 // Copied from https://github.com/backstage/backstage/blob/master/plugins/user-settings/src/components/useUserProfileInfo.ts
-import {
-  alertApiRef,
-  identityApiRef,
-  ProfileInfo,
-  useApi,
-} from '@backstage/core-plugin-api';
-import { useEffect } from 'react';
-import useAsync from 'react-use/lib/useAsync';
+// import {
+//   alertApiRef,
+//   identityApiRef,
+//   ProfileInfo,
+//   useApi,
+// } from '@backstage/core-plugin-api';
+// import { useEffect } from 'react';
+// import useAsync from 'react-use/lib/useAsync';
 
 /** @public */
 export const useUserProfile = () => {
@@ -40,7 +40,7 @@ export const useUserProfile = () => {
   return {
     profile: 'value!.profile',
     backstageIdentity: 'value!.identity',
-    name: undefined, // 'jorge', // for now not use: value!.profile.displayName ?? value!.identity.userEntityRef,
+    name: 'jorge', // for now not use: value!.profile.displayName ?? value!.identity.userEntityRef,
     loading: false,
   };
 };

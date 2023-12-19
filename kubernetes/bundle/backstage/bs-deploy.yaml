@@ -1,0 +1,58 @@
+#@ load("@ytt:data", "data")
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backstage
+  namespace: backstage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backstage
+  template:
+    metadata:
+      labels:
+        app: backstage
+    spec:
+      serviceAccountName: backstage-service-account
+      containers:
+        - args:
+            - -c
+            - |
+              export KUBERNETES_SERVICE_ACCOUNT_TOKEN="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
+              exec node packages/backend \
+                --config=/etc/app-config/app-config.production.yaml
+          command:
+            - bash
+          name: backstage
+          image: #@ data.values.full_image_name
+          imagePullPolicy: IfNotPresent
+          ports:
+            - protocol: TCP
+              containerPort: 7000
+            - protocol: TCP
+              containerPort: 7007
+          envFrom:
+            - secretRef:
+                name: postgres-secrets
+            - secretRef:
+                name: backstage-secrets
+          #! Uncomment if health checks are enabled in your app:
+          #! https://backstage.io/docs/plugins/observability#health-checks
+          #!          readinessProbe:
+          #!            httpGet:
+          #!              port: 7007
+          #!              path: /healthcheck
+          #!          livenessProbe:
+          #!            httpGet:
+          #!              port: 7007
+          #!              path: /healthcheck
+          volumeMounts:
+            - mountPath: '/etc/app-config/'
+              name: app-config
+              readOnly: true
+      volumes:
+        - name: app-config
+          configMap:
+            name: app-config

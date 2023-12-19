@@ -7,7 +7,7 @@ import {
 import { Router } from 'express';
 import { PluginEnvironment } from '../types';
 import {
-  EducatesEntityProvider,
+  // EducatesEntityProvider,
   EducatesEntitiesProcessor,
 } from '@internal/plugin-educates-backend';
 

@@ -25,7 +25,7 @@ export async function createRouter(
     response.json({ status: `ok ${userIdentity}` }); // Fixed the string concatenation
   });
 
-  router.get('/config', async (request, response) => {
+  router.get('/config', async (_request, response) => {
     logger.info(`Calling config`);
     config
       .getConfigArray(`educates.portals`)
