@@ -3,13 +3,19 @@ import {
   EducatesCatalogApiExecuteResponse,
   EducatesCatalogApiResponse,
 } from './EducatesCatalogApi.model';
+import { TrainingPortalDetails } from '../catalog/EducatesCatalogApi.model';
 
 export interface EducatesCatalogApi {
-  catalog: (user?: string) => Promise<EducatesCatalogApiResponse>;
+  catalog: (
+    portalName: string,
+    user?: string,
+  ) => Promise<EducatesCatalogApiResponse>;
+
   execute: (
+    portalDetails: TrainingPortalDetails,
     environment: string,
     user: string,
-  ) => Promise<EducatesCatalogApiExecuteResponse>;
+  ) => Promise<string>;
 }
 
 export const educatesCatalogApiRef = createApiRef<EducatesCatalogApi>({

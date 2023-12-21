@@ -14,24 +14,24 @@ import {
   Typography,
 } from '@material-ui/core';
 import { useApi } from '@backstage/core-plugin-api';
+import { useEntity } from '@backstage/plugin-catalog-react';
 import { useUserProfile } from '../useUserProfileInfo';
-import { educatesCatalogApiRef } from '../../api/EducatesCatalogApi';
-import { Workshop } from '../../api/EducatesCatalogApi.model';
+import { educatesCatalogApiRef } from '../../api/catalog/EducatesCatalogApi';
+import { EducatesCatalogApiResponse } from '../../api/catalog/EducatesCatalogApi.model';
 
-// s
 type WorkshopGridProps = {
   userName: string;
-  workshops: Workshop[];
+  portal?: EducatesCatalogApiResponse;
 };
 
-export const WorkshopGrid = ({ userName, workshops }: WorkshopGridProps) => {
+export const WorkshopGrid = ({ userName, portal }: WorkshopGridProps) => {
   // const classes = useStyles();
   const apiClient = useApi(educatesCatalogApiRef);
 
   /*
    * Use this mapping to create more meaningful elements for the tiles
    */
-  const data = workshops.map(def => {
+  const data = portal?.workshops.map(def => {
     return {
       // avatar: (
       //   <img
@@ -52,15 +52,19 @@ export const WorkshopGrid = ({ userName, workshops }: WorkshopGridProps) => {
   });
 
   const startWorkshop = async (env: string) => {
-    await apiClient.execute(env, userName).then(res => {
-      // We save the user if it was underfined
-      window.open(res.fullUrl, '_blank');
-    });
+    if (portal) {
+      await apiClient
+        .execute(portal.trainingPortal, env, userName)
+        .then(res => {
+          // We save the user if it was underfined
+          window.open(res, '_blank');
+        });
+    }
   };
 
   return (
     <ItemCardGrid>
-      {data.map((workshop, index) => (
+      {data?.map((workshop, index) => (
         <Card key={index}>
           <CardMedia>
             <ItemCardHeader title={workshop.title} />
@@ -97,11 +101,19 @@ export const WorkshopGrid = ({ userName, workshops }: WorkshopGridProps) => {
 
 export const WorkshopCatalog = () => {
   const apiClient = useApi(educatesCatalogApiRef);
+  const { entity } = useEntity();
+
   const { name } = useUserProfile();
 
-  const { value, loading, error } = useAsync(async (): Promise<Workshop[]> => {
-    return (await apiClient.catalog(name)).workshops;
-  }, []);
+  // TODO: Make this more intelligent
+  const trainingPortalName = entity?.metadata.name
+    ? entity.metadata.name
+    : 'backstage-educates-plugin';
+
+  const { value, loading, error } =
+    useAsync(async (): Promise<EducatesCatalogApiResponse> => {
+      return await apiClient.catalog(trainingPortalName, name);
+    }, []);
 
   if (loading) {
     return <Progress />;
@@ -111,13 +123,7 @@ export const WorkshopCatalog = () => {
 
   return (
     <>
-      <WorkshopGrid workshops={value || []} userName={name} />
-      {/* <InfoCard title="raw json">
-        <CodeSnippet
-          text={JSON.stringify(value?.json, null, 2)}
-          language="json"
-        />
-      </InfoCard> */}
+      <WorkshopGrid portal={value} userName={name} />
     </>
   );
 };

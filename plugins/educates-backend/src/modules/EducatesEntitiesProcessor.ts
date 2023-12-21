@@ -149,8 +149,8 @@ export class EducatesEntitiesProcessor implements CatalogProcessor {
       doEmit(
         component.spec.includedWorkshops,
         { defaultKind: 'Workshop', defaultNamespace: selfRef.namespace },
-        RELATION_WORKSHOP_INCLUDED_BY,
         RELATION_INCLUDES_WORKSHOP,
+        RELATION_WORKSHOP_INCLUDED_BY,
       );
       this.logger.info('Processed TrainingPortal');
     }
@@ -196,8 +196,8 @@ export class EducatesEntitiesProcessor implements CatalogProcessor {
       doEmit(
         component.spec.trainingPortals,
         { defaultKind: 'TrainingPortal', defaultNamespace: selfRef.namespace },
-        RELATION_INCLUDES_WORKSHOP,
         RELATION_WORKSHOP_INCLUDED_BY,
+        RELATION_INCLUDES_WORKSHOP,
       );
       this.logger.info('Processed Workshop');
     }

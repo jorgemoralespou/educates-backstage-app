@@ -3,11 +3,12 @@ export interface EducatesRestApiCatalogResponse {
   environments: Array<EducatesRestApiCatalogEnvironment>;
 }
 
-export interface EducatesRestApiCatalogPortal {
+interface EducatesRestApiCatalogPortal {
   name: string;
   displayName: string;
   description: string;
   logo: string;
+  url?: string;
 }
 
 export interface EducatesRestApiCatalogEnvironment {
@@ -58,4 +59,21 @@ export interface EducatesRestApiUserSession {
   expires: string;
   countdown: number;
   extendable: boolean;
+}
+
+export interface EducatesOauthResponse {
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+  scope: string;
+  refresh_token: string;
+}
+
+export interface EducatesTokenDetails {
+  portalUrl: string;
+  token: string;
+  client_id: string;
+  client_secret: string;
+  robot_username: string;
+  robot_password: string;
 }

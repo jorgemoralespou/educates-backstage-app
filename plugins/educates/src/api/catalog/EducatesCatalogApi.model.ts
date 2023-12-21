@@ -1,6 +1,34 @@
 export interface EducatesCatalogApiResponse {
-  user?: string;
   workshops: Array<Workshop>;
+  user?: string;
+  trainingPortal: TrainingPortalDetails;
+}
+export interface TrainingPortalDetails {
+  portalName: string;
+  namespace: string;
+  phase: string;
+  url: string;
+  clients: TrainingPortalStatusEducatesClients;
+  credentials: TrainingPortalStatusEducatesCredentials;
+}
+
+interface TrainingPortalStatusEducatesClients {
+  robot: TrainingPortalClients;
+}
+
+interface TrainingPortalClients {
+  id: string;
+  secret: string;
+}
+
+interface TrainingPortalStatusEducatesCredentials {
+  admin: TrainingPortalCredentials;
+  robot: TrainingPortalCredentials;
+}
+
+interface TrainingPortalCredentials {
+  username: string;
+  password: string;
 }
 
 export interface EducatesCatalogApiExecuteResponse {

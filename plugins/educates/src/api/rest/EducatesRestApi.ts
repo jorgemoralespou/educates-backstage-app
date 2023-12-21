@@ -4,15 +4,19 @@ import {
   EducatesRestApiExecuteResponse,
   EducatesRestApiUserSessionsResponse,
 } from './EducatesRestApi.model';
+import { TrainingPortalDetails } from '../catalog/EducatesCatalogApi.model';
 
 export interface EducatesRestApi {
-  catalog: () => Promise<EducatesRestApiCatalogResponse>;
+  catalog: (
+    portalDetails: TrainingPortalDetails,
+  ) => Promise<EducatesRestApiCatalogResponse>;
   execute: (
+    portalDetails: TrainingPortalDetails,
     environment: string,
     user?: string,
-  ) => Promise<EducatesRestApiExecuteResponse>;
-  activationUrl: (apiResp: EducatesRestApiExecuteResponse) => string;
+  ) => Promise<string>;
   getActiveSessions: (
+    portalDetails: TrainingPortalDetails,
     user: string,
   ) => Promise<EducatesRestApiUserSessionsResponse>;
 }

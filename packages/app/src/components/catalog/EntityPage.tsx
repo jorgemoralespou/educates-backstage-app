@@ -62,6 +62,7 @@ import {
   RELATION_INCLUDES_WORKSHOP,
   RELATION_WORKSHOP_INCLUDED_BY,
 } from '@internal/plugin-educates-common';
+import { WorkshopCatalog } from '@internal/plugin-educates';
 
 const techdocsContent = (
   <EntityTechdocsContent>
@@ -141,6 +142,14 @@ const overviewContent = (
     </Grid>
     <Grid item md={8} xs={12}>
       <EntityHasSubcomponentsCard variant="gridItem" />
+    </Grid>
+  </Grid>
+);
+
+const trainingPortalContent = (
+  <Grid container spacing={3} direction="column">
+    <Grid item>
+      <WorkshopCatalog />
     </Grid>
   </Grid>
 );
@@ -385,44 +394,16 @@ const domainPage = (
 
 const trainingportalPage = (
   <EntityLayout>
-    <EntityLayout.Route path="/" title="Overview">
+    <EntityLayout.Route path="/" title="Workshops">
+      {trainingPortalContent}
+    </EntityLayout.Route>
+    <EntityLayout.Route path="/information" title="Information">
       <Grid container spacing={3} alignItems="stretch">
         {entityWarningContent}
         <Grid item md={6}>
           <EntityAboutCard variant="gridItem" />
         </Grid>
-
-        {/* <Grid item md={6} xs={12}>
-          <EntityCatalogGraphCard variant="gridItem" height={400} />
-        </Grid>
-        <Grid item md={6}>
-          <EntityHasSystemsCard variant="gridItem" />
-        </Grid> */}
       </Grid>
-    </EntityLayout.Route>
-
-    <EntityLayout.Route path="/diagram" title="Diagram">
-      <EntityCatalogGraphCard
-        variant="gridItem"
-        direction={Direction.TOP_BOTTOM}
-        title="System Diagram"
-        height={700}
-        relations={[
-          RELATION_PART_OF,
-          RELATION_HAS_PART,
-          RELATION_WORKSHOP_INCLUDED_BY,
-          RELATION_INCLUDES_WORKSHOP,
-        ]}
-        unidirectional={false}
-      />
-    </EntityLayout.Route>
-
-    <EntityLayout.Route path="/kubernetes" title="Kubernetes">
-      <EntityKubernetesContent refreshIntervalMs={30000} />
-    </EntityLayout.Route>
-
-    <EntityLayout.Route path="/github-actions" title="GitHub Actions">
-      <EntityGithubActionsContent />
     </EntityLayout.Route>
   </EntityLayout>
 );

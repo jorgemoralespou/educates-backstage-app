@@ -3177,6 +3177,20 @@
     lodash "^4.17.21"
     luxon "^3.0.0"
 
+"@backstage/plugin-kubernetes-common@^0.7.2":
+  version "0.7.2"
+  resolved "https://registry.yarnpkg.com/@backstage/plugin-kubernetes-common/-/plugin-kubernetes-common-0.7.2.tgz#fd0398e06f63dcef56a08665718e67528e7c6216"
+  integrity sha512-PCpD1R/N7ilVbVIdduNtcT72diNoZVltevwKWclj7sPZ3U/FFFUuilZqMpoEitj71zL+ZKQwhY9Vpd3OJYgNaA==
+  dependencies:
+    "@backstage/catalog-model" "^1.4.3"
+    "@backstage/errors" "^1.2.3"
+    "@backstage/plugin-permission-common" "^0.7.11"
+    "@backstage/types" "^1.1.1"
+    "@kubernetes/client-node" "0.20.0"
+    kubernetes-models "^4.3.1"
+    lodash "^4.17.21"
+    luxon "^3.0.0"
+
 "@backstage/plugin-kubernetes-node@^0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@backstage/plugin-kubernetes-node/-/plugin-kubernetes-node-0.1.1.tgz#e5f81b1e267dfc9a33c056e91c2007edc3b6c3fa"
@@ -3214,6 +3228,34 @@
     xterm-addon-attach "^0.9.0"
     xterm-addon-fit "^0.8.0"
 
+"@backstage/plugin-kubernetes-react@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@backstage/plugin-kubernetes-react/-/plugin-kubernetes-react-0.2.0.tgz#b4a770512e2b955ff4ac4cd7db0a623268820aad"
+  integrity sha512-aLUzI01pU2ffX4q6YWQpY28m+WR0LzpCu08lW9S45tmlmToEZ5hL3wN/yBgUGLdwIZPBZK1bkQsvqhAlNQifvw==
+  dependencies:
+    "@backstage/catalog-model" "^1.4.3"
+    "@backstage/core-components" "^0.13.9"
+    "@backstage/core-plugin-api" "^1.8.1"
+    "@backstage/errors" "^1.2.3"
+    "@backstage/plugin-kubernetes-common" "^0.7.2"
+    "@backstage/types" "^1.1.1"
+    "@kubernetes-models/apimachinery" "^1.1.0"
+    "@kubernetes-models/base" "^4.0.1"
+    "@kubernetes/client-node" "^0.20.0"
+    "@material-ui/core" "^4.9.13"
+    "@material-ui/icons" "^4.11.3"
+    "@material-ui/lab" "^4.0.0-alpha.61"
+    "@types/react" "^16.13.1 || ^17.0.0"
+    cronstrue "^2.32.0"
+    js-yaml "^4.1.0"
+    kubernetes-models "^4.3.1"
+    lodash "^4.17.21"
+    luxon "^3.0.0"
+    react-use "^17.4.0"
+    xterm "^5.3.0"
+    xterm-addon-attach "^0.9.0"
+    xterm-addon-fit "^0.8.0"
+
 "@backstage/plugin-kubernetes@^0.11.2":
   version "0.11.2"
   resolved "https://registry.yarnpkg.com/@backstage/plugin-kubernetes/-/plugin-kubernetes-0.11.2.tgz#2436f89f6a3117f1cc2d1556613973cb66cd00e9"
@@ -3232,6 +3274,38 @@
     "@kubernetes-models/apimachinery" "^1.1.0"
     "@kubernetes-models/base" "^4.0.1"
     "@kubernetes/client-node" "0.19.0"
+    "@material-ui/core" "^4.12.2"
+    "@material-ui/icons" "^4.9.1"
+    "@material-ui/lab" "4.0.0-alpha.61"
+    "@types/react" "^16.13.1 || ^17.0.0"
+    cronstrue "^2.2.0"
+    js-yaml "^4.0.0"
+    kubernetes-models "^4.1.0"
+    lodash "^4.17.21"
+    luxon "^3.0.0"
+    react-use "^17.2.4"
+    xterm "^5.2.1"
+    xterm-addon-attach "^0.9.0"
+    xterm-addon-fit "^0.8.0"
+
+"@backstage/plugin-kubernetes@^0.11.3":
+  version "0.11.3"
+  resolved "https://registry.yarnpkg.com/@backstage/plugin-kubernetes/-/plugin-kubernetes-0.11.3.tgz#6de3a4ef585f9bacecb9c4787ceb469512acac79"
+  integrity sha512-cg+wFgOrmtuhEWOZxzb3DdjNWRvh+j3+nZ87ku1QKer1ltz1bYSRrgCJCnQs9Yq4c2EXXHnv8jLMCXT8T0GCzQ==
+  dependencies:
+    "@backstage/catalog-model" "^1.4.3"
+    "@backstage/config" "^1.1.1"
+    "@backstage/core-components" "^0.13.9"
+    "@backstage/core-plugin-api" "^1.8.1"
+    "@backstage/errors" "^1.2.3"
+    "@backstage/plugin-catalog-react" "^1.9.2"
+    "@backstage/plugin-kubernetes-common" "^0.7.2"
+    "@backstage/plugin-kubernetes-react" "^0.2.0"
+    "@backstage/theme" "^0.5.0"
+    "@backstage/types" "^1.1.1"
+    "@kubernetes-models/apimachinery" "^1.1.0"
+    "@kubernetes-models/base" "^4.0.1"
+    "@kubernetes/client-node" "0.20.0"
     "@material-ui/core" "^4.12.2"
     "@material-ui/icons" "^4.9.1"
     "@material-ui/lab" "4.0.0-alpha.61"
@@ -5136,6 +5210,28 @@
   version "0.19.0"
   resolved "https://registry.yarnpkg.com/@kubernetes/client-node/-/client-node-0.19.0.tgz#ebd2121e5c8dc1a47ff1b2574bda1e760d0abb82"
   integrity sha512-WTOjGuFQ8yeW3+qD6JrAYhpwpoQbe9R8cA/61WCyFrNawSTUgLstHu7EsZRYEs39er3jDn3wCEaczz+VOFlc2Q==
+  dependencies:
+    "@types/js-yaml" "^4.0.1"
+    "@types/node" "^20.1.1"
+    "@types/request" "^2.47.1"
+    "@types/ws" "^8.5.3"
+    byline "^5.0.0"
+    isomorphic-ws "^5.0.0"
+    js-yaml "^4.1.0"
+    jsonpath-plus "^7.2.0"
+    request "^2.88.0"
+    rfc4648 "^1.3.0"
+    stream-buffers "^3.0.2"
+    tar "^6.1.11"
+    tslib "^2.4.1"
+    ws "^8.11.0"
+  optionalDependencies:
+    openid-client "^5.3.0"
+
+"@kubernetes/client-node@0.20.0", "@kubernetes/client-node@^0.20.0":
+  version "0.20.0"
+  resolved "https://registry.yarnpkg.com/@kubernetes/client-node/-/client-node-0.20.0.tgz#4447ae27fd6eef3d4830a5a039f3b84ffd5c5913"
+  integrity sha512-xxlv5GLX4FVR/dDKEsmi4SPeuB49aRc35stndyxcC73XnUEEwF39vXbROpHOirmDse8WE9vxOjABnSVS+jb7EA==
   dependencies:
     "@types/js-yaml" "^4.0.1"
     "@types/node" "^20.1.1"
@@ -8377,7 +8473,7 @@
   resolved "https://registry.yarnpkg.com/@types/range-parser/-/range-parser-1.2.7.tgz#50ae4353eaaddc04044279812f52c8c65857dbcb"
   integrity sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==
 
-"@types/react-dom@*", "@types/react-dom@<18.0.0", "@types/react-dom@^17":
+"@types/react-dom@*", "@types/react-dom@<18.0.0":
   version "17.0.25"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-17.0.25.tgz#e0e5b3571e1069625b3a3da2b279379aa33a0cb5"
   integrity sha512-urx7A7UxkZQmThYA4So0NelOVjx3V4rNFVJwp0WZlbIK5eM4rNJDiN3R/E9ix0MBh6kAEojk/9YL+Te6D9zHNA==

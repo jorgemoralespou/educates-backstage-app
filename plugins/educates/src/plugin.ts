@@ -1,4 +1,5 @@
 import {
+  configApiRef,
   createApiFactory,
   createPlugin,
   createRoutableExtension,
@@ -8,10 +9,12 @@ import {
 } from '@backstage/core-plugin-api';
 
 import { rootRouteRef } from './routes';
-import { educatesRestApiRef } from './api/EducatesRestApi';
-import { EducatesRestApiClient } from './api/EducatesRestApi.client';
-import { educatesCatalogApiRef } from './api/EducatesCatalogApi';
-import { EducatesCatalogApiClient } from './api/EducatesCatalogApi.client';
+import { educatesRestApiRef } from './api/rest/EducatesRestApi';
+import { EducatesRestApiClient } from './api/rest/EducatesRestApi.client';
+import { educatesCatalogApiRef } from './api/catalog/EducatesCatalogApi';
+import { EducatesCatalogApiClient } from './api/catalog/EducatesCatalogApi.client';
+import { educatesKubernetesApiRef } from './api/kubernetes/EducatesKubernetesApi';
+import { EducatesKubernetesApiClient } from './api/kubernetes/EducatesKubernetesApi.client';
 
 export const educatesPlugin = createPlugin({
   id: 'educates',
@@ -20,23 +23,26 @@ export const educatesPlugin = createPlugin({
   },
   apis: [
     createApiFactory({
-      api: educatesRestApiRef,
-      deps: {
-        discoveryApi: discoveryApiRef,
-        identityApi: identityApiRef,
-        fetchApi: fetchApiRef,
-      },
-      factory: ({ discoveryApi, /* identityApi, */ fetchApi }) =>
-        new EducatesRestApiClient({
-          discoveryApi,
-          /* identityApi, */
-          fetchApi,
-        }),
-    }),
-    createApiFactory({
       api: educatesCatalogApiRef,
       deps: {},
       factory: () => new EducatesCatalogApiClient(),
+    }),
+    createApiFactory({
+      api: educatesKubernetesApiRef,
+      deps: {},
+      factory: () => new EducatesKubernetesApiClient(),
+    }),
+    createApiFactory({
+      api: educatesRestApiRef,
+      deps: {
+        fetchApi: fetchApiRef,
+        educatesKubernetesApi: educatesKubernetesApiRef,
+      },
+      factory: ({ fetchApi, educatesKubernetesApi }) =>
+        new EducatesRestApiClient({
+          fetchApi,
+          educatesKubernetesApi,
+        }),
     }),
   ],
 });

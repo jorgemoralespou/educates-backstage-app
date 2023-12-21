@@ -1107,24 +1107,9 @@ spec:
       orphaned: 5m
       overdue: 2m
       reserved: 0
-    - expires: 60m
-      initial: 0
-      name: lab-contour-vcluster
-      orphaned: 5m
-      overdue: 2m
-      reserved: 0
-    - expires: 60m
-      initial: 0
-      name: lab-remote-cluster
-      orphaned: 5m
-      overdue: 2m
-      reserved: 0
-    - expires: 60m
-      initial: 0
-      name: lab-setup-vcluster
-      orphaned: 5m
-      overdue: 2m
-      reserved: 0
+    - name: lab-contour-vcluster
+    - name: lab-remote-cluster
+    - name: lab-setup-vcluster
     - expires: 60m
       initial: 0
       name: lab-shared-vcluster
