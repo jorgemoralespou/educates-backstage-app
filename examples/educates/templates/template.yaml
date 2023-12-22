@@ -167,7 +167,7 @@ spec:
           # tags: ${{ parameters.tags }}
           # labels: ${{ parameters.labels }}
           # logo: ${{ parameters.logo }}
-          # repoUrl: ${{ parameters.repoUrl }}
+          repoName: ${{ parameters.repoUrl | parseRepoUrl | pick('repo') }}
 
     # - id: fetch-docs
     #   name: Fetch Docs
