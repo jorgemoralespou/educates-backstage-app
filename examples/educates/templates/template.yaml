@@ -153,7 +153,16 @@ spec:
         values:
           name: ${{ parameters.name }}
           owner: ${{ parameters.owner }}
-          # description
+          title: ${{ parameters.title }}
+          description: ${{ parameters.description }}
+          # difficulty: ${{ parameters.difficulty }}
+          # duration: ${{ parameters.duration }}
+          # vendor: ${{ parameters.vendor }}
+          # authors: ${{ parameters.authors }}
+          # tags: ${{ parameters.tags }}
+          # labels: ${{ parameters.labels }}
+          # logo: ${{ parameters.logo }}
+          # repoUrl: ${{ parameters.repoUrl }}
 
     # - id: fetch-docs
     #   name: Fetch Docs
