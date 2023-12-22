@@ -101,7 +101,16 @@ catalog:
     pullRequestBranchName: backstage-integration
   rules:
     - allow:
-        [Component, System, API, Resource, Location, Workshop, TrainingPortal]
+        [
+          Component,
+          System,
+          API,
+          Resource,
+          Location,
+          Workshop,
+          TrainingPortal,
+          Template,
+        ]
   # In production, we probably want to discover entities from github repositories and orgs,
   # for development we can use local files
   providers:
@@ -145,7 +154,10 @@ catalog:
     #   target: https://github.com/jorgemoralespou/labs-educates-showcase/blob/develop/catalog-info.yaml
     #   rules:
     #     - allow: [Workshop, TrainingPortal]
-
+    - type: file
+      target: ../../examples/educates/templates/template.yaml
+      rules:
+        - allow: [Template]
 educates:
   portals:
     - name: backstage-educates-plugin-ui

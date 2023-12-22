@@ -1,0 +1,180 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+# some metadata about the template itself
+metadata:
+  name: educates-workshop
+  title: Create a new educates workshop
+  description: Creates a new educates workshop in GitHub and creates the required GitHub actions to build and deploy the workshop.
+spec:
+  owner: educates
+  type: service
+
+  # these are the steps which are rendered in the frontend with the form input
+  parameters:
+    - title: Fill in some steps
+      required:
+        - name
+      properties:
+        name:
+          title: Name
+          type: string
+          description: Unique name of the workshop
+          ui:autofocus: true
+          ui:options:
+            rows: 5
+        title:
+          title: Title
+          type: string
+          description: Title that will be displayed on the dashboard
+          ui:options:
+            rows: 5
+        description:
+          title: Description
+          type: string
+          description: Description of the workshop
+          ui:options:
+            rows: 5
+        # url:
+        #   title: Url
+        #   type: string
+        #   description: Url where to find the workshop published
+        #   ui:autofocus: true
+        #   ui:options:
+        #     rows: 5
+        difficulty:
+          title: Difficulty
+          type: string
+          description: Difficulty of the workshop
+          anyOf:
+            - type: string
+              enum:
+                - beginner
+              title: Beginner
+            - type: string
+              enum:
+                - intermediate
+              title: Intermediate
+            - type: string
+              enum:
+                - advanced
+              title: Advanced
+            - type: string
+              enum:
+                - extreme
+              title: Extreme
+          ui:options:
+            rows: 5
+        duration:
+          title: Duration
+          type: string
+          default: 60m
+          ui:options:
+            description: Estimated duration in minutes of the workshop **(e.g. 60m)**
+            enableMarkdownInDescription: true
+            rows: 5
+        vendor:
+          title: Vendor
+          type: string
+          description: Vendor providing the workshop
+          ui:options:
+            rows: 5
+        authors:
+          title: Authors
+          type: array
+          description: Authors of the workshop
+          items:
+            type: string
+          ui:options:
+            emptyValue: ''
+            rows: 5
+        tags:
+          title: Tags
+          type: string
+          description: Authors of the workshop
+          ui:options:
+            rows: 5
+        labels:
+          title: Labels
+          type: string
+          description: Authors of the workshop
+          ui:options:
+            rows: 5
+        logo:
+          title: Logo
+          type: string
+          ui:options:
+            rows: 5
+            description: Logo in **data:image/png;base64** format
+            enableMarkdownInDescription: true
+    - title: Workshop Backstage details
+      required:
+        - owner
+      properties:
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the component
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: [Group, User]
+        # system
+        # lifecycle
+    - title: Choose a location
+      required:
+        - repoUrl
+      properties:
+        repoUrl:
+          title: Repository Location
+          type: string
+          ui:field: RepoUrlPicker
+          ui:options:
+            # Here's the option you can pass to the RepoUrlPicker
+            # requestUserCredentials:
+            #   secretsKey: USER_OAUTH_TOKEN
+            #   additionalScopes:
+            #     github:
+            #       - workflow
+            allowedHosts:
+              - github.com
+            allowedOwners:
+              - educates
+              - jorgemoralespou
+              - grahamdumpleton
+              - educates-labs
+
+  # here's the steps that are executed in series in the scaffolder backend
+  steps:
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./content
+        values:
+          name: ${{ parameters.name }}
+          owner: ${{ parameters.owner }}
+          # description
+
+    # - id: fetch-docs
+    #   name: Fetch Docs
+    #   action: fetch:plain
+    #   input:
+    #     targetPath: ./community
+    #     url: https://github.com/backstage/community/tree/main/backstage-community-sessions
+
+    - id: publish
+      name: Publish
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: This is ${{ parameters.name }}
+        repoUrl: ${{ parameters.repoUrl }}
+        # here's where the secret can be used
+        # token: ${{ secrets.USER_OAUTH_TOKEN }}
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: '/catalog-info.yaml'

@@ -1,0 +1,8 @@
+apiVersion: educates.dev/v1alpha1
+kind: Workshop
+metadata:
+  name: ${{ values.name | dump }}
+spec:
+  owner: educates
+  system: educates-workshops
+  lifecycle: experimental
