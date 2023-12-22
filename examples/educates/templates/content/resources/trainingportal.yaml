@@ -1,7 +1,7 @@
 apiVersion: training.educates.dev/v1beta1
 kind: TrainingPortal
 metadata:
-  name: ${{ values.name | dump }}
+  name: ${{ values.name | safe }}
 spec:
   portal:
     registration:
@@ -15,7 +15,7 @@ spec:
         reserved: 1
         initial: 0
   workshops:
-    - name: ${{ values.name | dump }}
+    - name: ${{ values.name | safe }}
       expires: 40m
       overtime: 10m
       deadline: 60m

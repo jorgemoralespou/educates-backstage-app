@@ -1,16 +1,16 @@
 apiVersion: training.educates.dev/v1beta1
 kind: Workshop
 metadata:
-  name: ${{ values.name | dump }}
+  name: ${{ values.name | safe }}
 spec:
-  title: ${{ values.title | dump }}
-  description: ${{ values.description | dump }}
+  title: ${{ values.title | safe }}
+  description: ${{ values.description | safe }}
   publish:
-    image: '$(image_repository)/${{ values.name | dump }}-files:$(workshop_version)'
+    image: '$(image_repository)/${{ values.name | safe }}-files:$(workshop_version)'
   workshop:
     files:
       - image:
-          url: '$(image_repository)/${{ values.name | dump }}-files:$(workshop_version)'
+          url: '$(image_repository)/${{ values.name | safe }}-files:$(workshop_version)'
         includePaths:
           - /workshop/**
           - /exercises/**

@@ -1,7 +1,7 @@
 apiVersion: educates.dev/v1alpha1
 kind: Workshop
 metadata:
-  name: ${{ values.name | dump }}
+  name: ${{ values.name | safe }}
 spec:
   owner: educates
   system: educates-workshops

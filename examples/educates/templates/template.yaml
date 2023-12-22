@@ -5,9 +5,12 @@ metadata:
   name: educates-workshop
   title: Create a new educates workshop
   description: Creates a new educates workshop in GitHub and creates the required GitHub actions to build and deploy the workshop.
+  tags:
+    - educates
+    - workshop
 spec:
   owner: educates
-  type: service
+  type: Workshop
 
   # these are the steps which are rendered in the frontend with the form input
   parameters:
@@ -150,6 +153,8 @@ spec:
       action: fetch:template
       input:
         url: ./content
+        copyWithoutRender:
+          - .github/workflows/*
         values:
           name: ${{ parameters.name }}
           owner: ${{ parameters.owner }}
@@ -187,3 +192,11 @@ spec:
       input:
         repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
         catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps.publish.output.remoteUrl }}
+      - title: Open in catalog
+        icon: catalog
+        entityRef: ${{ steps.register.output.entityRef }}
