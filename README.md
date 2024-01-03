@@ -9,12 +9,22 @@ yarn install
 yarn dev
 ```
 
-## Get educates token in sample environment
+## Developing on educates (on Kind)
+
+This command will build the backstage image, will push it to the local educates registry and then deploy to the educates kind cluster
+using kapp. **NOTE** You only need to tweak the `my-values.yaml` file.
+
+Build:
 
 ```
-kubectl apply -f sample-trainingportal.yaml
+yarn install --frozen-lockfile
+yarn tsc  # This might fail if code checking fails.
+# Build the dist packages
+yarn build:backend
+```
 
-export EDUCATES_TOKEN=$(curl -s -X POST -d "grant_type=password&username=robot-user&password=top-secret" -u "application-id:top-secret" https://backstage-educates-plugin-ui.cluster-eu.spring-staging.academy/oauth2/token/ | jq -r ".access_token")
+Deploy:
 
-yarn dev
+```
+ytt --data-values-file my-values.yaml -f kubernetes --ignore-unknown-comments | kbld -f - | kapp deploy -a educates-backstage -n default -c -f - -y
 ```

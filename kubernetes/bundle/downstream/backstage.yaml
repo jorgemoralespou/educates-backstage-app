@@ -1,0 +1,327 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:yaml", "yaml")
+#@ load("@ytt:base64", "base64")
+
+#@ def app_config():
+app:
+  title: Educates Backstage App
+  baseUrl: #@ "https://backstage.{}".format(data.values.domain)
+organization:
+  name: Educates
+backend:
+  # Used for enabling authentication, secret is shared by all backend plugins
+  # See https://backstage.io/docs/auth/service-to-service-auth for
+  # information on the format
+  # auth:
+  #   keys:
+  #     - secret: ${BACKEND_SECRET}
+  baseUrl: #@ "https://backstage.{}".format(data.values.domain)
+  listen:
+    port: 7000
+    # Uncomment the following host directive to bind to specific interfaces
+    # host: 127.0.0.1
+  csp:
+    connect-src: ["'self'", 'http:', 'https:']
+    # Content-Security-Policy directives follow the Helmet format: https://helmetjs.github.io/#reference
+    # Default Helmet Content-Security-Policy values can be removed by setting the key to false
+  cors:
+    origin: #@ "https://backstage.{}".format(data.values.domain)
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+  # This is for local development only, it is not recommended to use this in production
+  # The production database configuration is stored in app-config.production.yaml
+  database:
+    #@ if data.values.database_type == 'sqllite':
+    client: better-sqlite3
+    connection: ':memory:'
+    #@ elif data.values.database_type == 'postgres':
+    # config options: https://node-postgres.com/apis/client
+    client: pg
+    connection:
+      host: ${POSTGRES_HOST}
+      port: ${POSTGRES_PORT}
+      user: ${POSTGRES_USER}
+      password: ${POSTGRES_PASSWORD}
+    #@ end
+
+  # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
+
+integrations:
+  github:
+    - host: github.com
+      # This is a Personal Access Token or PAT from GitHub. You can find out how to generate this token, and more information
+      # about setting up the GitHub integration here: https://backstage.io/docs/getting-started/configuration#setting-up-a-github-integration
+      token: ${GITHUB_TOKEN}
+#    # ## Example for how to add your GitHub Enterprise instance using the API:
+#    # - host: ghe.example.net
+#    #   apiBaseUrl: https://ghe.example.net/api/v3
+#    #   token: ${GHE_TOKEN}
+
+proxy:
+  ### Example for how to add a proxy endpoint for the frontend.
+  ### A typical reason to do this is to handle HTTPS and CORS for internal services.
+  # endpoints:
+  #   '/test':
+  #     target: 'https://example.com'
+  #     changeOrigin: true
+
+  # # To get the token run:
+  # # curl -v -X POST -d "grant_type=password&username=robot-user&password=top-secret" -u "application-id:top-secret" https://backstage-educates-plugin-ui.kind.tanzu-devs.com/oauth2/token/
+  # endpoints:
+  #   # You can access the data by: http://localhost:7007/api/proxy/educates/workshops/catalog/environments/
+  #   '/educates': # /educates/
+  #     target: 'https://labs-educates-showcase-ui.kind.tanzu-devs.com'
+  #     pathRewrite:
+  #       '^/api/proxy/educates': '/'
+  #     changeOrigin: true
+  #     headers:
+  #       Authorization: 'Bearer YqcRbgUdagasffoIQaW7VatosoXF1m' # ${EDUCATES_TOKEN}'
+
+# Reference documentation http://backstage.io/docs/features/techdocs/configuration
+# Note: After experimenting with basic setup, use CI/CD to generate docs
+# and an external cloud storage when deploying TechDocs for production use-case.
+# https://backstage.io/docs/features/techdocs/how-to-guides#how-to-migrate-from-techdocs-basic-to-recommended-deployment-approach
+techdocs:
+  builder: 'local' # Alternatives - 'external'
+  generator:
+    runIn: 'docker' # Alternatives - 'local'
+  publisher:
+    type: 'local' # Alternatives - 'googleGcs' or 'awsS3'. Read documentation for using alternatives.
+
+auth:
+  # see https://backstage.io/docs/auth/ to learn about auth providers
+  # providers: {}
+  environment: development
+  providers:
+    github:
+      development:
+        clientId: ${AUTH_GITHUB_CLIENT_ID}
+        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+
+scaffolder:
+  # see https://backstage.io/docs/features/software-templates/configuration for software template options
+
+catalog:
+  import:
+    entityFilename: catalog-info.yaml
+    pullRequestBranchName: backstage-integration
+  rules:
+    - allow:
+        [
+          Component,
+          System,
+          API,
+          Resource,
+          Location,
+          Workshop,
+          TrainingPortal,
+          Template,
+        ]
+  # In production, we probably want to discover entities from github repositories and orgs,
+  # for development we can use local files
+  providers:
+    github:
+      trainingportal-samples:
+        organization: 'jorgemoralespou' # string
+        catalogPath: '/catalog-info.yaml' # string
+        filters:
+          branch: 'develop' # string
+          repository: 'labs-educates-showcase' # Regex
+        schedule: # optional; same options as in TaskScheduleDefinition
+          # supports cron, ISO duration, "human duration" as used in code
+          frequency: { minutes: 30 }
+          # supports ISO duration, "human duration" as used in code
+          timeout: { minutes: 3 }
+      template-samples:
+        organization: 'jorgemoralespou' # string
+        catalogPath: '/examples/educates/templates/template.yaml' # string
+        filters:
+          branch: 'main' # string
+          repository: 'educates-backstage-app' # Regex
+        schedule: # optional; same options as in TaskScheduleDefinition
+          # supports cron, ISO duration, "human duration" as used in code
+          frequency: { minutes: 30 }
+          # supports ISO duration, "human duration" as used in code
+          timeout: { minutes: 3 }
+  locations:
+    # Local example data, file locations are relative to the backend process, typically `packages/backend`
+    # - type: file
+    #   target: ../../examples/entities.yaml
+
+    # Local example template
+    # - type: file
+    #   target: ../../examples/template/template.yaml
+    #   rules:
+    #     - allow: [Template]
+
+    # Local example organizational data
+    # - type: file
+    #   target: ../../examples/org.yaml
+    #   rules:
+    #     - allow: [User, Group]
+
+    # # educates
+    # # In production, we probably want to discover entities from github repositories and orgs,
+    # # for development we can use local files
+    # # - type: file
+    # #   target: ../../examples/educates/entities.yaml
+    # #   rules:
+    # #     - allow: [Workshop, TrainingPortal]
+    # - type: url
+    #   target: https://github.com/jorgemoralespou/labs-educates-showcase/blob/develop/catalog-info.yaml
+    #   rules:
+    #     - allow: [Workshop, TrainingPortal]
+
+# educates:
+#   portals:
+#     - name: labs-educates-showcase-ui
+#       url: https://labs-educates-showcase-ui.kind.tanzu-devs.com
+#       robot:
+#         credentials:
+#           username: robot@educates
+#           password: lUsw9ySkB36jYeKhcXLJEdR7tPTN24fM
+#         client:
+#           id: 6qpzgn4oMtdHF0cCb5QIYhJO9rVSfaw8
+#           secret: FB2cnHwklsv6ba91O7dZUoRtIeWESDzx
+
+kubernetes:
+  customResources:
+    - group: 'training.educates.dev'
+      apiVersion: 'v1beta1'
+      plural: 'workshops'
+    - group: 'training.educates.dev'
+      apiVersion: 'v1beta1'
+      plural: 'trainingportals'
+  serviceLocatorMethod:
+    type: 'multiTenant'
+  clusterLocatorMethods:
+    - type: 'config'
+      clusters:
+        - url: https://kubernetes.default.svc.cluster.local:443
+          name: local
+          authProvider: 'serviceAccount'
+          skipTLSVerify: true
+          skipMetricsLookup: true
+#@ end
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: backstage
+  annotations:
+    kapp.k14s.io/versioned: ""
+type: Opaque
+data:
+  app-config.production.yaml: #@ yaml.encode(app_config())
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: backstage-secrets
+  namespace: backstage
+type: Opaque
+data:
+  GITHUB_TOKEN: #@ base64.encode(data.values.github_token)
+  AUTH_GITHUB_CLIENT_ID: #@ base64.encode(data.values.auth.github.client_id)
+  AUTH_GITHUB_CLIENT_SECRET: #@ base64.encode(data.values.auth.github.client_secret)
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backstage
+  namespace: backstage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backstage
+  template:
+    metadata:
+      labels:
+        app: backstage
+    spec:
+      serviceAccountName: backstage-sa
+      containers:
+        - args:
+            - -c
+            - |
+              export KUBERNETES_SERVICE_ACCOUNT_TOKEN="$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)"
+              exec node packages/backend \
+                --config=/etc/app-config/app-config.production.yaml
+          command:
+            - bash
+          name: backstage
+          image: backstage-educates-app
+          imagePullPolicy: IfNotPresent
+          ports:
+            - protocol: TCP
+              containerPort: 7000
+            - protocol: TCP
+              containerPort: 7007
+          envFrom:
+            #@ if/end data.values.database_type == 'postgres':
+            - secretRef:
+                name: postgres-secrets
+            - secretRef:
+                name: backstage-secrets
+          #! Uncomment if health checks are enabled in your app:
+          #! https://backstage.io/docs/plugins/observability#health-checks
+          #!          readinessProbe:
+          #!            httpGet:
+          #!              port: 7007
+          #!              path: /healthcheck
+          #!          livenessProbe:
+          #!            httpGet:
+          #!              port: 7007
+          #!              path: /healthcheck
+          volumeMounts:
+            - mountPath: '/etc/app-config/'
+              name: app-config
+              readOnly: true
+      volumes:
+        - name: app-config
+          configMap:
+            name: app-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backstage
+  namespace: backstage
+spec:
+  selector:
+    app: backstage
+  ports:
+    - port: 80
+      targetPort: 7000
+      name: frontend
+    - port: 7007
+      targetPort: 7007
+      name: backend
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: wildcard
+  name: backstage-frontend
+  namespace: backstage
+spec:
+  rules:
+    #! Make domain configurable
+    - host: #@ "backstage.{}".format(data.values.domain)
+      http:
+        paths:
+          - backend:
+              service:
+                name: backstage
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        -  #@ "backstage.{}".format(data.values.domain)
+      secretName: tls-cert-backstage

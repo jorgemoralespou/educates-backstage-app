@@ -1,0 +1,26 @@
+#@ load("@ytt:data", "data")
+---
+apiVersion: kbld.k14s.io/v1alpha1
+kind: Config
+#@ if data.values.build_image == True:
+sources:
+  - image: backstage-educates-app
+    #! docker image build . -f packages/backend/Dockerfile --tag educates-backstage:0.0.1
+    path: .
+    docker:
+      buildx:
+        #! target: some-target
+        pull: true
+        #! noCache: true
+        file: packages/backend/Dockerfile
+        #! rawOptions: ['--platform=linux/amd64,linux/arm64,linux/arm/v7']
+        rawOptions: ['--push', '--platform=linux/amd64,linux/arm64']
+destinations:
+  - image: backstage-educates-app
+    newImage: #@ data.values.full_image_name
+    tags: [latest, devel]
+#@ else:
+overrides:
+  - image: backstage-educates-app
+    newImage: #@ data.values.full_image_name
+#@ end

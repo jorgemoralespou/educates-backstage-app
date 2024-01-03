@@ -1,6 +1,11 @@
 #@data/values-schema
 ---
+domain: kind.example.com
 full_image_name: educates-backstage:0.0.1
+build_image: True
+
+#! Ingress should use cluster-issuer or wildcard?
+
 #@schema/nullable
 #@schema/validation not_null=True
 github_token: ''
@@ -8,8 +13,9 @@ auth:
   github:
     client_id: ''
     client_secret: ''
+#@chema/oneof ['postgres', 'sqllite']
+database_type: 'sqllite'
+#! TODO: Add validations when type is postgres
 postgres:
   user: backstage
   password: postgres
-#@schema/type any=True
-app_config:
