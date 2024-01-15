@@ -1,8 +1,1 @@
-/***/
-/**
- * Common functionalities for the educates plugin.
- *
- * @packageDocumentation
- */
-
-export * from './kinds';
+export * from './entity';

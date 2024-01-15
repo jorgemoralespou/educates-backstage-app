@@ -6,10 +6,7 @@ import {
 } from '@backstage/plugin-catalog-backend-module-github';
 import { Router } from 'express';
 import { PluginEnvironment } from '../types';
-import {
-  // EducatesEntityProvider,
-  EducatesEntitiesProcessor,
-} from '@internal/plugin-educates-backend';
+import { EducatesEntitiesProcessor } from '@internal/plugin-educates-backend';
 
 export default async function createPlugin(
   env: PluginEnvironment,

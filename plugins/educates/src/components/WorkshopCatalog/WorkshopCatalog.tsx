@@ -16,17 +16,25 @@ import {
 import { useApi } from '@backstage/core-plugin-api';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { useUserProfile } from '../useUserProfileInfo';
-import { educatesCatalogApiRef } from '../../api/catalog/EducatesCatalogApi';
-import { EducatesCatalogApiResponse } from '../../api/catalog/EducatesCatalogApi.model';
+import {
+  educatesApiRef,
+  EducatesApiCatalogResponse,
+  EducatesRequestParams,
+} from '../../api';
 
 type WorkshopGridProps = {
   userName: string;
-  portal?: EducatesCatalogApiResponse;
+  portal?: EducatesApiCatalogResponse;
+  params: EducatesRequestParams;
 };
 
-export const WorkshopGrid = ({ userName, portal }: WorkshopGridProps) => {
+export const WorkshopGrid = ({
+  userName,
+  portal,
+  params,
+}: WorkshopGridProps) => {
   // const classes = useStyles();
-  const apiClient = useApi(educatesCatalogApiRef);
+  const apiClient = useApi(educatesApiRef);
 
   /*
    * Use this mapping to create more meaningful elements for the tiles
@@ -53,12 +61,10 @@ export const WorkshopGrid = ({ userName, portal }: WorkshopGridProps) => {
 
   const startWorkshop = async (env: string) => {
     if (portal) {
-      await apiClient
-        .execute(portal.trainingPortal, env, userName)
-        .then(res => {
-          // We save the user if it was underfined
-          window.open(res, '_blank');
-        });
+      await apiClient.execute(params as EducatesRequestParams).then(res => {
+        // We save the user if it was underfined
+        window.open(res, '_blank');
+      });
     }
   };
 
@@ -100,7 +106,7 @@ export const WorkshopGrid = ({ userName, portal }: WorkshopGridProps) => {
 };
 
 export const WorkshopCatalog = () => {
-  const apiClient = useApi(educatesCatalogApiRef);
+  const apiClient = useApi(educatesApiRef);
   const { entity } = useEntity();
 
   const { name } = useUserProfile();
@@ -109,10 +115,44 @@ export const WorkshopCatalog = () => {
   const trainingPortalName = entity?.metadata.name
     ? entity.metadata.name
     : 'backstage-educates-plugin';
+  const endpoint = entity?.metadata?.annotations?.[
+    'training.educates.dev/endpoint'
+  ]
+    ? entity.metadata.annotations?.['training.educates.dev/endpoint']
+    : 'none';
+  const clientId = entity?.metadata?.annotations?.[
+    'training.educates.dev/client-id'
+  ]
+    ? entity.metadata.annotations?.['training.educates.dev/client-id']
+    : 'none';
+  const clientSecret = entity?.metadata?.annotations?.[
+    'training.educates.dev/client-secret'
+  ]
+    ? entity.metadata.annotations?.['training.educates.dev/client-secret']
+    : 'none';
+  const robotUsername = entity?.metadata?.annotations?.[
+    'training.educates.dev/robot-username'
+  ]
+    ? entity.metadata.annotations?.['training.educates.dev/robot-username']
+    : 'none';
+  const robotPassword = entity?.metadata?.annotations?.[
+    'training.educates.dev/robot-password'
+  ]
+    ? entity.metadata.annotations?.['training.educates.dev/robot-password']
+    : 'none';
+
+  const params = {
+    portalName: trainingPortalName,
+    url: endpoint,
+    clientId: clientId,
+    clientSecret: clientSecret,
+    username: robotUsername,
+    password: robotPassword,
+  };
 
   const { value, loading, error } =
-    useAsync(async (): Promise<EducatesCatalogApiResponse> => {
-      return await apiClient.catalog(trainingPortalName, name);
+    useAsync(async (): Promise<EducatesApiCatalogResponse> => {
+      return await apiClient.catalog(params);
     }, []);
 
   if (loading) {
@@ -123,7 +163,7 @@ export const WorkshopCatalog = () => {
 
   return (
     <>
-      <WorkshopGrid portal={value} userName={name} />
+      <WorkshopGrid portal={value} userName={name} params={params} />
     </>
   );
 };

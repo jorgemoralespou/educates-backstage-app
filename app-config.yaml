@@ -1,9 +1,9 @@
 app:
-  title: Scaffolded Backstage App
+  title: Educates Backstage App
   baseUrl: http://localhost:3000
 
 organization:
-  name: My Company
+  name: Educates
 
 backend:
   # Used for enabling authentication, secret is shared by all backend plugins
@@ -52,24 +52,7 @@ integrations:
 #    #   token: ${GHE_TOKEN}
 
 proxy:
-  ### Example for how to add a proxy endpoint for the frontend.
-  ### A typical reason to do this is to handle HTTPS and CORS for internal services.
-  # endpoints:
-  #   '/test':
-  #     target: 'https://example.com'
-  #     changeOrigin: true
-
-  # To get the token run:
-  # curl -v -X POST -d "grant_type=password&username=robot-user&password=top-secret" -u "application-id:top-secret" https://backstage-educates-plugin-ui.cluster-eu.spring-staging.academy/oauth2/token/
   endpoints:
-    # You can access the data by: http://localhost:7007/api/proxy/educates/workshops/catalog/environments/
-    '/educates': # /educates/
-      target: 'https://backstage-educates-plugin-ui.cluster-eu.spring-staging.academy'
-      pathRewrite:
-        '^/api/proxy/educates': '/'
-      changeOrigin: true
-      headers:
-        Authorization: 'Bearer ${EDUCATES_TOKEN}'
 
 # Reference documentation http://backstage.io/docs/features/techdocs/configuration
 # Note: After experimenting with basic setup, use CI/CD to generate docs
@@ -114,18 +97,18 @@ catalog:
   # In production, we probably want to discover entities from github repositories and orgs,
   # for development we can use local files
   providers:
-    github:
-      jorgemoralespou:
-        organization: 'jorgemoralespou' # string
-        catalogPath: '/catalog-info.yaml' # string
-        filters:
-          branch: 'develop' # string
-          repository: 'labs-educates-showcase' # Regex
-        schedule: # optional; same options as in TaskScheduleDefinition
-          # supports cron, ISO duration, "human duration" as used in code
-          frequency: { minutes: 30 }
-          # supports ISO duration, "human duration" as used in code
-          timeout: { minutes: 3 }
+    # github:
+    #   jorgemoralespou:
+    #     organization: 'jorgemoralespou' # string
+    #     catalogPath: '/catalog-info.yaml' # string
+    #     filters:
+    #       branch: 'develop' # string
+    #       repository: 'labs-educates-showcase' # Regex
+    #     schedule: # optional; same options as in TaskScheduleDefinition
+    #       # supports cron, ISO duration, "human duration" as used in code
+    #       frequency: { minutes: 30 }
+    #       # supports ISO duration, "human duration" as used in code
+    #       timeout: { minutes: 3 }
   locations:
     # Local example data, file locations are relative to the backend process, typically `packages/backend`
     - type: file
@@ -146,10 +129,10 @@ catalog:
     # # educates
     # # In production, we probably want to discover entities from github repositories and orgs,
     # # for development we can use local files
-    # # - type: file
-    # #   target: ../../examples/educates/entities.yaml
-    # #   rules:
-    # #     - allow: [Workshop, TrainingPortal]
+    - type: file
+      target: ../../examples/educates/entities.yaml
+      rules:
+        - allow: [Workshop, TrainingPortal]
     # - type: url
     #   target: https://github.com/jorgemoralespou/labs-educates-showcase/blob/develop/catalog-info.yaml
     #   rules:
@@ -158,14 +141,3 @@ catalog:
       target: ../../examples/educates/templates/template.yaml
       rules:
         - allow: [Template]
-educates:
-  portals:
-    - name: backstage-educates-plugin-ui
-      url: https://backstage-educates-plugin-ui.cluster-eu.spring-staging.academy
-      robot:
-        credentials:
-          username: robot-user
-          password: top-secret
-        client:
-          id: application-id
-          secret: top-secret

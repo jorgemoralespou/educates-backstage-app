@@ -1,20 +1,22 @@
 import {
-  configApiRef,
+  // configApiRef,
   createApiFactory,
   createPlugin,
   createRoutableExtension,
   discoveryApiRef,
-  fetchApiRef,
-  identityApiRef,
+  // fetchApiRef,
+  // identityApiRef,
 } from '@backstage/core-plugin-api';
 
 import { rootRouteRef } from './routes';
-import { educatesRestApiRef } from './api/rest/EducatesRestApi';
-import { EducatesRestApiClient } from './api/rest/EducatesRestApi.client';
-import { educatesCatalogApiRef } from './api/catalog/EducatesCatalogApi';
-import { EducatesCatalogApiClient } from './api/catalog/EducatesCatalogApi.client';
-import { educatesKubernetesApiRef } from './api/kubernetes/EducatesKubernetesApi';
-import { EducatesKubernetesApiClient } from './api/kubernetes/EducatesKubernetesApi.client';
+// import { educatesRestApiRef } from './api/rest/EducatesRestApi';
+// import { EducatesRestApiClient } from './api/rest/EducatesRestApi.client';
+// import { educatesCatalogApiRef } from './api/catalog/EducatesCatalogApi';
+// import { EducatesCatalogApiClient } from './api/catalog/EducatesCatalogApi.client';
+// import { educatesKubernetesApiRef } from './api/kubernetes/EducatesKubernetesApi';
+// import { EducatesKubernetesApiClient } from './api/kubernetes/EducatesKubernetesApi.client';
+import { EducatesApiClient } from './api/educates/EducatesApi.client';
+import { educatesApiRef } from './api';
 
 export const educatesPlugin = createPlugin({
   id: 'educates',
@@ -22,26 +24,34 @@ export const educatesPlugin = createPlugin({
     root: rootRouteRef,
   },
   apis: [
+    // createApiFactory({
+    //   api: educatesCatalogApiRef,
+    //   deps: {},
+    //   factory: () => new EducatesCatalogApiClient(),
+    // }),
+    // createApiFactory({
+    //   api: educatesKubernetesApiRef,
+    //   deps: {},
+    //   factory: () => new EducatesKubernetesApiClient(),
+    // }),
+    // createApiFactory({
+    //   api: educatesRestApiRef,
+    //   deps: {
+    //     discoveryApi: discoveryApiRef,
+    //   },
+    //   factory: ({ discoveryApi }) =>
+    //     new EducatesRestApiClient({
+    //       discoveryApi,
+    //     }),
+    // }),
     createApiFactory({
-      api: educatesCatalogApiRef,
-      deps: {},
-      factory: () => new EducatesCatalogApiClient(),
-    }),
-    createApiFactory({
-      api: educatesKubernetesApiRef,
-      deps: {},
-      factory: () => new EducatesKubernetesApiClient(),
-    }),
-    createApiFactory({
-      api: educatesRestApiRef,
+      api: educatesApiRef,
       deps: {
-        fetchApi: fetchApiRef,
-        educatesKubernetesApi: educatesKubernetesApiRef,
+        discoveryApi: discoveryApiRef,
       },
-      factory: ({ fetchApi, educatesKubernetesApi }) =>
-        new EducatesRestApiClient({
-          fetchApi,
-          educatesKubernetesApi,
+      factory: ({ discoveryApi }) =>
+        new EducatesApiClient({
+          discoveryApi,
         }),
     }),
   ],
